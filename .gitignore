@@ -1,0 +1,39 @@
+# temporary files, e.g., emacs
+*~
+
+# Swap files
+*.swp
+
+# Backup files
+*.bak
+
+# Binary files, compiled files
+bin/*
+*mod
+*.o
+executables/*
+*.exe
+
+# data folder for communication
+data/*
+results/*
+*/data/*
+*/results/*
+
+# documentation folders
+latex/*
+html/*
+public/
+
+# Other files
+.DS_Store
+.vscode
+
+# python cache etc
+*/__pycache__/*
+*.pyc
+*.dSYM
+*.egg-info
+python/docs/_build/*
+.ipynb_checkpoints/*
+
