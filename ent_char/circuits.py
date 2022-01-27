@@ -64,3 +64,47 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
 
     return circ
 
+def ring_circ(num_qubits, num_reps=1, barrier=False):
+    """Create the circuit NN with periodic conditions at the boundaries, 
+        corresponding to the circuit 15 of the paper [ADD REF].
+    
+    Parameters
+    ----------
+    num_qubits : int
+        Total number of qubits in the system
+    num_reps : int, optional
+        Number of repetitions. By default 1
+    barrier : bool, optional
+        If True, insert a barrier after each repetition. Default to False.
+
+    Returns
+    -------
+    circ : QuantumCircuit
+        The parametric quantum circuit
+    """
+    circ = QuantumCircuit(num_qubits)
+
+    num_params = 2*num_qubits*num_reps
+    params = ParameterVector('θ', length=num_params)
+    param_idx = 0
+
+    for rep in range(num_reps):
+        for ii in range(num_qubits):
+            circ.ry(params[param_idx], ii)
+            param_idx += 1
+        circ.cx(0, num_qubits-1)
+        for ii in range(num_qubits-1, 0, -1):
+            circ.cx(ii-1, ii)
+        for ii in range(num_qubits):
+            circ.ry(params[param_idx], ii)
+            param_idx += 1
+        
+        circ.cx(num_qubits-1, num_qubits-2)
+        circ.cx(0, num_qubits-1)
+        for ii in range(0, num_qubits-1):
+            circ.cx(ii+1, ii)
+
+        if barrier:
+            circ.barrier
+
+    return circ
