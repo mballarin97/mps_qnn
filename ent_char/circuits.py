@@ -105,6 +105,6 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
             circ.cx(ii+1, ii)
 
         if barrier:
-            circ.barrier
+            circ.barrier()
 
     return circ
