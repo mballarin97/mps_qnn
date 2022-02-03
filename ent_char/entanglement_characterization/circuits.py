@@ -1,5 +1,5 @@
 """
-Circuit architectures not present in the qiskit package.
+Circuit architectures not present in the qiskit package
 """
 
 
@@ -11,12 +11,10 @@ from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
     """
     Creates the QNN from Abbas, given by repetition of ZZfeaturemap and TwoLocal vartiaional ansatz.
-    @TODO Write better documentation.
     """
 
     param_names = ['θ'+str(i) for i in range(0, reps)]
-    feature_map = ZZFeatureMap(
-        num_qubits, reps=1, entanglement='linear', insert_barriers=barrier)
+    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear', insert_barriers=barrier)
 
     qc = QuantumCircuit(num_qubits)
 
@@ -30,15 +28,15 @@ def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
 
             if barrier:
                 qc.barrier()
-                
+
             qc = qc.compose(var_ansatz)
             
             if barrier:
                 qc.barrier()
 
-    else:
-        qc = qc.compose(ZZFeatureMap(
-            num_qubits, reps=reps, insert_barriers=barrier))
+    elif alternate == False:
+        qc = qc.compose(ZZFeatureMap(num_qubits, reps=reps,
+                        entanglement='linear', insert_barriers=barrier))
         
         if barrier:
             qc.barrier()
@@ -46,6 +44,8 @@ def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
         # Skip final rotation to ensure the alternate = T/F have same number of params
         qc = qc.compose(TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=reps, 
                                 skip_final_rotation_layer=True, insert_barriers=barrier))
+    else:
+        raise TypeError(f"Structure {alternate} not implemented. ")
 
     return qc
 

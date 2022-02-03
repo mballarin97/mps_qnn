@@ -15,7 +15,7 @@ from qiskit.quantum_info import DensityMatrix
 from qiskit import Aer, transpile
 sim_bknd = Aer.get_backend('statevector_simulator')
 
-seed = 42
+seed = 21
 np.random.seed(seed)
 
 def run_mps(qc, max_bond_dim=10):
@@ -66,12 +66,11 @@ def haar_entanglement(num_qubits, num_A, log_base = 'e'):
 def haar_bond_entanglement(num_qubits):
     """
     Evaluates the expected value of the entanglement bond if the states were Haar distributed.
-    Just as the haar_entanglement function, but with reshaping for having consistent dimension.
     """
 
     entanglement_bond = [haar_entanglement(num_qubits, i) for i in range(1, int(num_qubits / 2)+1)]
     
-    # Just for fixing lenght and indexes
+    # Just for fixing shapes in plotting.
     if num_qubits % 2 == 0:
         entanglement_bond = entanglement_bond + entanglement_bond[::-1][1:]
     else:
@@ -82,9 +81,7 @@ def haar_bond_entanglement(num_qubits):
 
 def entanglement_entropy(statevector, idx_to_trace=None):
     """
-    Entanglement entropy of subsystem of a pure state. Given a statevector (i.e. pure state), builds the density matrix, 
-    and traces out some systems. Then eveluates Von Neumann entropy using Qiskit's implementation. 
-    Be consistent with the base of the logarithm. 
+    Entanglement entropy of subsystem of a pure state. 
     """
     # Construct density matrix
     rho = np.outer(statevector, np.conjugate(statevector))
@@ -96,9 +93,7 @@ def entanglement_entropy(statevector, idx_to_trace=None):
 
 def entanglement_bond(statevector):
     """
-    Evaluates the entanglement entropies for cuts in a 1-d quantum system (as in MPS), given a pure state 
-    statevector of num_qubits qubits, thus with length 2**num_qubits.
-    Must be a valid statevector: amplitudes summing to one. 
+    Evaluates the entanglement entropies for cuts in a 1-d quantum system, as in MPS, given a pure state of num_qubits qubits.
     """
     num_qubits = int(np.log2(len(statevector)))
     
@@ -131,7 +126,7 @@ def mps_simulation(qc, random_params):
 
 def aer_simulation(qc, random_params):
     """
-    Simulation using Qiskit Aer to study bond entanglement.
+    Simulation using Qiskti Aer to study bond entanglement.
     """
 
     qk_results_list = []
