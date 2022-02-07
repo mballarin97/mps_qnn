@@ -1,9 +1,11 @@
 # Import necessary modules
 import sys
+import time
+
 from qcomps import run_simulation
 from qcomps.qk_utils import qk_transpilation_params
 from qcomps import TNObsTensorProduct, TNObservables, QCOperators, QCConvergenceParameters
-from circuits import ring_circ, Abbas_QNN
+from circuits import ring_circ, Abbas_QNN, general_qnn
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -14,9 +16,6 @@ from qiskit.quantum_info.states.measures import entropy
 from qiskit.quantum_info import DensityMatrix
 from qiskit import Aer, transpile
 sim_bknd = Aer.get_backend('statevector_simulator')
-
-seed = 21
-np.random.seed(seed)
 
 def run_mps(qc, max_bond_dim=10):
     """
@@ -66,11 +65,12 @@ def haar_entanglement(num_qubits, num_A, log_base = 'e'):
 def haar_bond_entanglement(num_qubits):
     """
     Evaluates the expected value of the entanglement bond if the states were Haar distributed.
+    Just as the haar_entanglement function, but with reshaping for having consistent dimension.
     """
 
     entanglement_bond = [haar_entanglement(num_qubits, i) for i in range(1, int(num_qubits / 2)+1)]
     
-    # Just for fixing shapes in plotting.
+    # Just for fixing lenght and indexes
     if num_qubits % 2 == 0:
         entanglement_bond = entanglement_bond + entanglement_bond[::-1][1:]
     else:
@@ -81,7 +81,9 @@ def haar_bond_entanglement(num_qubits):
 
 def entanglement_entropy(statevector, idx_to_trace=None):
     """
-    Entanglement entropy of subsystem of a pure state. 
+    Entanglement entropy of subsystem of a pure state. Given a statevector (i.e. pure state), builds the density matrix, 
+    and traces out some systems. Then eveluates Von Neumann entropy using Qiskit's implementation. 
+    Be consistent with the base of the logarithm. 
     """
     # Construct density matrix
     rho = np.outer(statevector, np.conjugate(statevector))
@@ -93,7 +95,9 @@ def entanglement_entropy(statevector, idx_to_trace=None):
 
 def entanglement_bond(statevector):
     """
-    Evaluates the entanglement entropies for cuts in a 1-d quantum system, as in MPS, given a pure state of num_qubits qubits.
+    Evaluates the entanglement entropies for cuts in a 1-d quantum system (as in MPS), given a pure state 
+    statevector of num_qubits qubits, thus with length 2**num_qubits.
+    Must be a valid statevector: amplitudes summing to one. 
     """
     num_qubits = int(np.log2(len(statevector)))
     
@@ -126,7 +130,7 @@ def mps_simulation(qc, random_params):
 
 def aer_simulation(qc, random_params):
     """
-    Simulation using Qiskti Aer to study bond entanglement.
+    Simulation using Qiskit Aer to study bond entanglement.
     """
 
     qk_results_list = []
@@ -136,7 +140,10 @@ def aer_simulation(qc, random_params):
         qk_results = sim_bknd.run(qc_t.assign_parameters(params))
         qk_results_list.append(np.asarray(qk_results.result().get_statevector()))
     
+    print("\nPartial tracing...")
+    now = time.time()
     aer_ent = np.array([entanglement_bond(state) for state in qk_results_list])
+    print(f" >> Ended in {time.time()-now}")
     ent_means = np.mean(aer_ent, axis=0)
     ent_std = np.std(aer_ent, axis=0)
 
@@ -153,25 +160,17 @@ def logger(data):
         print(f"{k} = {v}", end="\n")
     print("===============================")
 
-def main(num_qubits = 4, num_reps = 2, ansatz = 'QNN', alternate = False, backend = 'MPS'):
+def main(num_qubits, num_reps, ansatz = None, alternate = True, backend = 'Aer'):
 
     data = {'num_qubits': num_qubits,
             'num_reps': num_reps,
             'backend': backend,
             'alternate': alternate,
-            'ansatz': ansatz}
+            'ansatz': ansatz[1]}
     logger(data)
 
-    ######################################################
-    # CHOOSE CIRCUIT ANSATZ
-    qc = qk.QuantumCircuit(num_qubits)
-    if ansatz == 'ring':
-        qc = qc.compose(ring_circ(num_qubits, num_reps = num_reps, barrier = False)) # Ring circ
-    if ansatz == 'qnn':
-        qc = qc.compose(Abbas_QNN(num_qubits, reps=num_reps, alternate=alternate, barrier=True)) # Abbas QNN
-    else:
-        raise TypeError(f"{ansatz} not implemented")
-    
+    # Quantum Circuit is saved in the first component of the ansatz argument. Second is its name.
+    qc = ansatz[0]
 
     ######################################################
     # GENERATE RANDOM PARAMETERS (both inputs and weights)
@@ -216,14 +215,31 @@ def main(num_qubits = 4, num_reps = 2, ansatz = 'QNN', alternate = False, backen
 
 if __name__ == '__main__': 
 
+    seed = 34
+    np.random.seed(seed)
+
     # Quantum Cirucit structure
-    num_qubits = 10
-    num_reps = 6
+    num_qubits = 5
+    num_reps = 5
     alternate = True
-    ansatz = 'qnn'
 
     # Choose simulation backend
     #backend = 'MPS'
     backend = 'Aer'
 
-    main(num_qubits, num_reps, ansatz=ansatz, backend=backend, alternate=alternate)
+    # Select Circuit
+    #ansatz = ring_circ(num_qubits, num_reps=num_reps, barrier=False)  # Ring circ
+    #ansatz = Abbas_QNN(num_qubits, reps = num_reps, alternate = alternate, barrier = True) # AbbassQNN
+
+    # SPECIFY YOUR OWN VQC, with a feature map and variational ansatz.
+    # Reps: Be sure that they use just one rep, as they are used as building blocks to build the full circuit. 
+    # Inputs: Parameters in the feature_map are considered like inputs, so are equal in each layer.
+    # Weights: Parameters in the var_ansata are considered trainable variables, so are different in each layer.
+    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
+    var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=True, skip_final_rotation_layer=True)
+    ansatz = general_qnn(num_reps, feature_map = feature_map, var_ansatz = var_ansatz, alternate = alternate, barrier = False)
+
+    ansatz_circuit = ansatz[0]
+    ansatz_name = ansatz[1]
+
+    main(num_qubits, num_reps, ansatz=[ansatz_circuit, ansatz_name], backend=backend, alternate=alternate)

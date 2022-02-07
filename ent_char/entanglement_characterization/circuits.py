@@ -1,11 +1,65 @@
 """
-Circuit architectures not present in the qiskit package
+Circuit architectures not present in the qiskit package.
+Each function returns a Variational Circuit and also a string of its name, for logging reasons.
 """
-
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
+
+
+def general_qnn(num_reps, alternate=False, feature_map=None, var_ansatz=None, barrier=True):
+    """
+    Creates a general Quantum Neural Network with reuploading given a feature map and a variational (trainable) ansatz.  
+    """
+
+    if feature_map.num_qubits != var_ansatz.num_qubits:
+        raise TypeError(f"Feature map and variational ansatz have a different number of qubits!")
+
+    param_names = ['θ'+str(i) for i in range(num_reps)]
+    param_per_rep = len(var_ansatz.parameters)
+
+    params_list = [ParameterVector(param_names[i], length=param_per_rep) for i in range(num_reps)]
+
+    input_list = ParameterVector('x', length=len(feature_map.parameters))
+    feature_map = feature_map.assign_parameters(input_list)
+
+    num_qubits = feature_map.num_qubits
+    qc = QuantumCircuit(num_qubits)
+
+    if alternate == True:
+        for i in range(num_reps):
+            # Feature map first
+            qc = qc.compose(feature_map)
+            if barrier:
+                qc.barrier()
+
+            # Variational ansatz (renaming params to avoid naming conflicts)
+            var_ansatz = var_ansatz.assign_parameters(params_list[i])
+            qc = qc.compose(var_ansatz)
+            if barrier:
+                qc.barrier()
+
+    elif alternate == False:
+        # Feature map firs repeated reps times
+        for i in range(num_reps):
+            qc = qc.compose(feature_map)
+            if barrier:
+                qc.barrier()
+
+        # Variational ansatz repeated reps times
+        for i in range(num_reps):
+            var_ansatz = var_ansatz.assign_parameters(params_list[i])
+            qc = qc.compose(var_ansatz)
+            if barrier:
+                qc.barrier()
+    else:
+        raise TypeError(f"Structure {alternate} not implemented. ")
+
+    #@TODO: Rename trainable parameters as θ[0],...,θ[p].
+
+    return qc, 'general_qnn'
+
 
 
 def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
@@ -47,7 +101,7 @@ def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
     else:
         raise TypeError(f"Structure {alternate} not implemented. ")
 
-    return qc
+    return qc, 'Abbas_QNN'
 
 def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
     """Create the piramidal circuit generalization 
@@ -106,7 +160,7 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
         if barrier:
             circ.barrier()
 
-    return circ
+    return circ, 'piramidal_circuit'
 
 def ring_circ(num_qubits, num_reps=1, barrier=False):
     """Create the circuit NN with periodic conditions at the boundaries, 
@@ -151,4 +205,4 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
         if barrier:
             circ.barrier()
 
-    return circ
+    return circ, 'ring_circ'
