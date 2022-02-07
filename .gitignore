@@ -1,3 +1,8 @@
+# Random files
+qml_data/
+ent_char/.ipynb_checkpoints/
+ent_char/entanglement_characterization/data/
+
 # temporary files, e.g., emacs
 *~
 
