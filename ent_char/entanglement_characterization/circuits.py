@@ -1,6 +1,14 @@
 """
 Circuit architectures not present in the qiskit package.
 Each function returns a Variational Circuit and also a string of its name, for logging reasons.
+
+Circuit numbers from Fig. 2 of [1].
+Abbass QNN from [2].
+
+Refs:
+[1] Expressibility and Entangling Capability of PQCs for Hybrid Quantum-Classical Algorithms, Kim et al. (2019).
+[2] The power of QNN, Abbass et al. (2020).
+
 """
 
 from qiskit import QuantumCircuit
@@ -10,7 +18,7 @@ from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
 def general_qnn(num_reps, alternate=False, feature_map=None, var_ansatz=None, barrier=True):
     """
-    Creates a general Quantum Neural Network with reuploading given a feature map and a variational (trainable) ansatz.  
+    Creates a general Quantum Neural Network with reuploading given a feature map and a variational (trainable) block.  
     """
 
     if feature_map.num_qubits != var_ansatz.num_qubits:
@@ -25,7 +33,7 @@ def general_qnn(num_reps, alternate=False, feature_map=None, var_ansatz=None, ba
     feature_map = feature_map.assign_parameters(input_list)
 
     num_qubits = feature_map.num_qubits
-    qc = QuantumCircuit(num_qubits)
+    qc = QuantumCircuit(num_qubits, name="QNN", metadata = {"none": "none"})
 
     if alternate == True:
         for i in range(num_reps):
@@ -56,10 +64,36 @@ def general_qnn(num_reps, alternate=False, feature_map=None, var_ansatz=None, ba
     else:
         raise TypeError(f"Structure {alternate} not implemented. ")
 
-    #@TODO: Rename trainable parameters as θ[0],...,θ[p].
+    # Extract feature map entanglement map
+    try: 
+        feature_map.entanglement
+    except:
+        fmap_entanglement = feature_map.metadata["entanglement_map"]
+    else:  
+        fmap_entanglement = feature_map.entanglement
+    
+    # Extract variational ansatz entanglement map
+    try:
+        var_ansatz.entanglement
+    except:
+        var_entanglement = var_ansatz.metadata["entanglement_map"]
+    else:
+        var_entanglement = var_ansatz.entanglement
 
-    return qc, 'general_qnn'
+    data = dict({"num_qubits": num_qubits,
+                 "num_reps": num_reps,
+                 "alternate": alternate,
+                 "params": len(qc.parameters),
+                 "fmap": feature_map.name,
+                 "fmap_entanglement": fmap_entanglement,
+                 "var_ansatz": var_ansatz.name,
+                 "var_entanglement": var_entanglement
+                })
+    qc.metadata = data
 
+    # @TODO: Rename trainable parameters as θ[0],...,θ[p].
+
+    return qc
 
 
 def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
@@ -70,7 +104,7 @@ def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
     param_names = ['θ'+str(i) for i in range(0, reps)]
     feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear', insert_barriers=barrier)
 
-    qc = QuantumCircuit(num_qubits)
+    qc = QuantumCircuit(num_qubits, name = "AbbassQNN")
 
     if alternate:
         for i in range(reps):
@@ -101,11 +135,11 @@ def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
     else:
         raise TypeError(f"Structure {alternate} not implemented. ")
 
-    return qc, 'Abbas_QNN'
+    return qc
 
 def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
-    """Create the piramidal circuit generalization 
-        corresponding to the circuit 12 of the paper [ADD REF].
+    """
+    Create the piramidal circuit generalization corresponding to the circuit 12 of the paper [1].
     
     Parameters
     ----------
@@ -126,7 +160,8 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
     circ : QuantumCircuit
         The parametric quantum circuit
     """
-    circ = QuantumCircuit(num_qubits)
+
+    circ = QuantumCircuit(num_qubits, name = "piramidal_circuit")
 
     # Compute the number of parameters
     if piramidal:
@@ -160,11 +195,14 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
         if barrier:
             circ.barrier()
 
-    return circ, 'piramidal_circuit'
+    metadata = dict({"entanglement_map": "linear"})
+    circ.metadata = metadata
+
+    return circ
 
 def ring_circ(num_qubits, num_reps=1, barrier=False):
-    """Create the circuit NN with periodic conditions at the boundaries, 
-        corresponding to the circuit 15 of the paper [ADD REF].
+    """
+    Create the circuit NN with periodic conditions at the boundaries, corresponding to the circuit 15 of the paper [1].
     
     Parameters
     ----------
@@ -180,7 +218,8 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
     circ : QuantumCircuit
         The parametric quantum circuit
     """
-    circ = QuantumCircuit(num_qubits)
+
+    circ = QuantumCircuit(num_qubits, name = "ring_circ")
 
     num_params = 2*num_qubits*num_reps
     params = ParameterVector('θ', length=num_params)
@@ -205,4 +244,65 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
         if barrier:
             circ.barrier()
 
-    return circ, 'ring_circ'
+    metadata = dict({"entanglement_map": "circular_ish"})
+    circ.metadata = metadata
+
+    return circ
+
+
+def dummy_circ(num_qubits, num_reps=1, barrier=False):
+    """
+    Create a dummy/easy qc.
+    """
+
+    circ = QuantumCircuit(num_qubits, name="dummy_circ")
+
+    num_params = 2 * num_qubits * num_reps
+    params = ParameterVector('θ', length=num_params)
+    
+    param_idx = 0
+    for rep in range(num_reps):
+        for ii in range(num_qubits):
+            circ.ry(params[param_idx], ii)
+            param_idx += 1
+            circ.rz(params[param_idx], ii)
+            param_idx += 1
+        
+        if barrier:
+            circ.barrier()
+
+    metadata = dict({"entanglement_map": "none"})
+    circ.metadata = metadata
+
+    return circ
+
+
+def circuit9(num_qubits, num_reps=1, barrier=False):
+    """
+    Circuit 9 from [1].
+    """
+
+    circ = QuantumCircuit(num_qubits, name="circuit9")
+
+    num_params = 1 * num_qubits * num_reps
+    params = ParameterVector('θ', length=num_params)
+
+    param_idx = 0
+    for rep in range(num_reps):
+        for ii in range(num_qubits):
+            circ.h(ii)
+        
+        for ii in range(num_qubits-1):
+            circ.cz(ii, ii+1)
+        
+        for ii in range(num_qubits):
+            circ.rx(params[param_idx], ii)
+            param_idx += 1
+
+        if barrier:
+            circ.barrier()
+
+    metadata = dict({"entanglement_map": "linear"})
+    circ.metadata = metadata
+
+    return circ

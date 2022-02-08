@@ -160,46 +160,43 @@ def logger(data):
         print(f"{k} = {v}", end="\n")
     print("===============================")
 
-def main(num_qubits, num_reps, ansatz = None, alternate = True, backend = 'Aer'):
+def main(ansatz = None, backend = 'Aer'):
 
-    data = {'num_qubits': num_qubits,
-            'num_reps': num_reps,
-            'backend': backend,
-            'alternate': alternate,
-            'ansatz': ansatz[1]}
-    logger(data)
+    metadata = ansatz.metadata
+    logger(metadata)
 
-    # Quantum Circuit is saved in the first component of the ansatz argument. Second is its name.
-    qc = ansatz[0]
+    num_qubits = metadata['num_qubits']
+    num_reps = metadata['num_reps']
+    alternate = metadata['alternate']
 
     ######################################################
     # GENERATE RANDOM PARAMETERS (both inputs and weights)
     trials = 1_00
-    random_params = np.pi * np.random.rand(trials, len(qc.parameters))
+    random_params = np.pi * np.random.rand(trials, len(ansatz.parameters))
 
     ######################################################
     # SIMULATION WITH MPS or Aer
     if backend == 'MPS':    
-        ent_means, ent_std = mps_simulation(qc, random_params)
+        ent_means, ent_std = mps_simulation(ansatz, random_params)
     elif backend == 'Aer':   
-        ent_means, ent_std = aer_simulation(qc, random_params)
+        ent_means, ent_std = aer_simulation(ansatz, random_params)
     else:
         raise TypeError(f"Backend {backend} not available")
 
     ######################################################
     # ENTANGLEMENT STUDY
-    print("Measured entanglement = ", ent_means)
+    print("Measured entanglement =     ", np.round(ent_means,4))
 
     # Expected entanglement accross cut lines if Haar distributed
     ent_haar = haar_bond_entanglement(num_qubits)
-    print("Haar entanglement at bond = ", ent_haar)
+    print("Haar entanglement at bond = ", np.round(ent_haar,4))
 
     ######################################################
     # PLOT
     if False:
         fig = plt.figure(figsize=(8, 5))
 
-        plt.title(f"{ansatz}, alternated = {alternate}, reps = {num_reps}, n_params = {len(random_params[0])}")
+        plt.title(f"{ansatz}, alternated = {alternate}, reps = {num_reps}, n_params = {len(ansatz.parameters)}")
         plt.xticks(range(num_qubits))
         plt.ylabel("Entanglement Entropy")
         plt.xlabel("Bond entanglement")
@@ -215,6 +212,7 @@ def main(num_qubits, num_reps, ansatz = None, alternate = True, backend = 'Aer')
 
 if __name__ == '__main__': 
 
+    # Fixing seed for reproducibility
     seed = 34
     np.random.seed(seed)
 
@@ -223,23 +221,18 @@ if __name__ == '__main__':
     num_reps = 5
     alternate = True
 
-    # Choose simulation backend
-    #backend = 'MPS'
-    backend = 'Aer'
-
-    # Select Circuit
-    #ansatz = ring_circ(num_qubits, num_reps=num_reps, barrier=False)  # Ring circ
-    #ansatz = Abbas_QNN(num_qubits, reps = num_reps, alternate = alternate, barrier = True) # AbbassQNN
-
-    # SPECIFY YOUR OWN VQC, with a feature map and variational ansatz.
+    # Select a feature map and a variational block
     # Reps: Be sure that they use just one rep, as they are used as building blocks to build the full circuit. 
     # Inputs: Parameters in the feature_map are considered like inputs, so are equal in each layer.
     # Weights: Parameters in the var_ansata are considered trainable variables, so are different in each layer.
+    #ansatz = ring_circ(num_qubits, num_reps=num_reps, barrier=False)  # Ring circ
+    #ansatz = Abbas_QNN(num_qubits, reps = num_reps, alternate = alternate, barrier = True) # AbbassQNN
     feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
     var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=True, skip_final_rotation_layer=True)
     ansatz = general_qnn(num_reps, feature_map = feature_map, var_ansatz = var_ansatz, alternate = alternate, barrier = False)
 
-    ansatz_circuit = ansatz[0]
-    ansatz_name = ansatz[1]
+    # Choose simulation backend
+    #backend = 'MPS'
+    backend = 'Aer'
 
-    main(num_qubits, num_reps, ansatz=[ansatz_circuit, ansatz_name], backend=backend, alternate=alternate)
+    main(ansatz, backend=backend)

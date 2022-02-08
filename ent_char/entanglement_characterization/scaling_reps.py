@@ -11,7 +11,7 @@ from scipy.stats import linregress
 import qiskit as qk
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
-from entanglement_characterization import main as ent_bonds
+from entanglement_characterization import main as ent_char
 
 class HiddenPrints:
     def __enter__(self):
@@ -29,20 +29,30 @@ def is_close(measured, theory):
     dist2 = np.sum(theory) - np.sum(measured)
     return dist2, dist1
 
-def create_ansatz(num_qubits, num_reps, alternate):
-    # Select Circuit
-    #feature_map = ring_circ(num_qubits, num_reps=num_reps, barrier=False)[0]  # Ring circ
-    #ansatz = Abbas_QNN(num_qubits, reps = num_reps, alternate = alternate, barrier = True) # AbbassQNN
-    # SPECIFY YOUR OWN VQC, with a feature map and variational ansatz.
-    # Be sure that they use just one rep, as they are used as building blocks to build the full circuit.
-    # Inputs: Parameters in the feature_map are considered like inputs, so are equal in each layer.
-    # Weights: Parameters in the var_ansata are considered trainable variables, so are different in each layer.
-    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement = entanglement_map)
-    var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', entanglement_map, reps=1, insert_barriers=True, skip_final_rotation_layer=True)
+def pick_circuit(num_qubits, num_reps, alternate=True):
+    """
+    Select a circuit with a feature map and a variational block. Examples below.
+    Each block must have reps = 1, and then specify the 
+    """
 
-    ansatz = general_qnn(num_reps, feature_map=feature_map, var_ansatz=var_ansatz, alternate=alternate, barrier=False)
+    # Example: Abbass-QNN
+    # feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
+    # var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
+    # or already defined full PQC
+    # Abbas_QNN(num_qubits, reps=num_reps, alternate=alternate, barrier=True)  # Full PQC
 
-    #print(ansatz[0].decompose())
+    # Example:
+    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
+    var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1,
+                          insert_barriers=False, skip_final_rotation_layer=True)
+
+    # Other examples:
+    # ring_circ(num_qubits, num_reps=1, barrier=False)  # Ring circ (n.15 from Kim et al.)
+    # piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False) # Piramidal circ (n.12 from Kim et al.)
+
+    # Build the PQC
+    ansatz = general_qnn(num_reps, feature_map=feature_map,
+                         var_ansatz=var_ansatz, alternate=alternate, barrier=False)
 
     return ansatz
 
@@ -51,7 +61,6 @@ np.random.seed(seed)
 
 alternate = True
 backend = 'Aer'
-entanglement_map = "linear"
 
 num_qubits = list(range(2, 11))
 eps = 0.05
@@ -61,10 +70,10 @@ for idx, nq in enumerate(num_qubits):
     for num_reps in range(int(nq/2)+1, 2*nq+5):
         print(f"Run {idx} of {len(num_qubits)}, num_qubits = {nq} of {max(num_qubits)}, reps = {num_reps}", end="\r")
         
-        ansatz = create_ansatz(nq, num_reps, alternate)
+        ansatz = pick_circuit(nq, num_reps, alternate = alternate)
         
         with HiddenPrints():
-            ent_meas, _, ent_haar = ent_bonds(nq, num_reps, ansatz=ansatz, backend=backend, alternate=alternate)
+            ent_meas, _, ent_haar = ent_bonds(ansatz=ansatz, backend=backend)
         dist = is_close(ent_meas, ent_haar)
         
         if dist[0] < eps:
@@ -80,7 +89,18 @@ x = np.array(num_qubits)
 y = np.array(r_star)
 res = linregress(x, y)
 
-path = f"./data/optimal_reps/"
+# Save data
+path = "./data/optimal_reps/"
+timestamp = time.localtime()
+save_as = time.strftime("%Y-%m-%d_%H-%M-%S", timestamp) + '_' + str(np.random.randint(0, 1000))
+name = path + save_as + '_' + str(max_num_qubits)
+
+fmap, var_block = ansatz.metadata['fmap'], ansatz.metadata['var_ansatz']
+meta = dict({"fmap": fmap, "var_ansatz": var_block, "eps_close": eps,
+             "alternate": alternate, "backend": backend})
+with open(name+'.json', 'w') as fp:
+    json.dump(meta, fp)
+
 np.savez(path+f"{max(num_qubits)}_{entanglement_map}", x=x, y=y, q=res.intercept, m=res.slope)
 
 # Plot

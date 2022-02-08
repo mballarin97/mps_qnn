@@ -1,28 +1,47 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import json
 
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
 from entanglement_characterization import main as ent_char
-from circuits import ring_circ, general_qnn, Abbas_QNN
+from circuits import *
+
+def removekey(d, keys):
+    r = dict(d)
+    for key in keys:
+        del r[key]
+    return r
 
 def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', alternate = True):
+    """
+    Study of the total entanglement in the MPS state, varying the number of qubits. 
+    """
 
     ent_data = []
-    for nq in range(4, max_num_qubits+1, 2):
-        tmp = ent_vs_reps(nq, backend=backend, alternate = alternate)
+    for nqubits in range(4, max_num_qubits+1, 2):
+        tmp = ent_vs_reps(nqubits, backend=backend, alternate=alternate)
         ent_data.append(tmp)
 
     # Save data
-    path = "./data/ent_scaling/"
+    path = './data/ent_scaling/'
 
     timestamp = time.localtime()
     save_as = time.strftime("%Y-%m-%d_%H-%M-%S", timestamp) + '_' + str(np.random.randint(0, 1000))
+    name = path + save_as
 
-    idx = np.random.randint(0, high = 5000)
-    name = path+str(max_num_qubits)+save_as
-    np.save(name, np.array(ent_data, dtype = object), allow_pickle=True)
+    # Save details of the ansatz
+    ansatz = pick_circuit(2, 2, alternate=alternate)
+    meta = dict({"max_num_qubits": max_num_qubits, "backend": backend})
+    circ_data = removekey(ansatz.metadata, ["num_qubits", "num_reps", "params"])
+    meta.update(circ_data)  # add metadata from the ansatz
+    
+    with open(name+'.json', 'w') as file:
+        json.dump(meta, file, indent=4)
+    
+    ent_data = np.array(ent_data, dtype=object)
+    np.save(name, ent_data, allow_pickle=True)
 
     #How to plot
     #data = np.array(data)
@@ -40,21 +59,19 @@ def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', alternate = True)
     #plt.legend()
     #plt.show()
 
-
 def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True):
     """
-    Evaluate the total entanglement (sum of entanglement accross bipartitions) in the quantum state, 
+    Evaluate the total entanglement (sum of entanglement accross bipartitions) in the MPS quantum state, 
     for various repetitions of the ansatz, for a fixed number of qubits.
     """
     
-    ent_list, _ = main(num_qubits, backend=backend, alternate=alternate)
-
-    num_reps = len(ent_list)
+    ent_list, _ = main(num_qubits, backend = backend, alternate = alternate)
 
     tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # sum accorss all bonds for a fixed repetition 
     tot_ent_per_rep_std = np.sum(ent_list[:, 1, :], axis=1) # sum accorss all bonds for a fixed repetition
     haar_ent = np.sum(ent_list[:, 2, :], axis=1) # sum accorss all bonds for a fixed repetition 
    
+    #num_reps = len(ent_list)
     #fig = plt.figure(figsize=(8,5))
     #plt.plot(range(1, num_reps+1), tot_ent_per_rep)
     #plt.hlines(haar_ent[0], 1, num_reps, ls='--', color='r')
@@ -65,7 +82,7 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True):
 
 def alt_comparison(num_qubits, ansatz = None, backend = 'Aer'):
     """
-    Plot joined figure of alternated vs. non alternated architecture. 
+    Plot joined figure of alternated vs. non alternated architecture.
     """
 
     res = []
@@ -77,7 +94,7 @@ def alt_comparison(num_qubits, ansatz = None, backend = 'Aer'):
     cmap = plt.get_cmap('tab10')
 
     fig = plt.figure(figsize=(12, 8))
-    plt.title(f"Circuit")
+    plt.title("Circuit")
     plt.xticks(range(num_qubits))
     plt.ylabel("Entanglement Entropy")
     plt.xlabel("Bond index cut")
@@ -100,10 +117,42 @@ def alt_comparison(num_qubits, ansatz = None, backend = 'Aer'):
     plt.tight_layout()
     plt.show()
 
+def pick_circuit(num_qubits, num_reps, alternate = True):
+    """
+    Select a circuit with a feature map and a variational block. Examples below.
+    Each block must have reps = 1, and then specify the 
+    """
+
+    # Example: Abbass-QNN
+    # feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
+    # var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
+    # or already defined full PQC
+    # Abbas_QNN(num_qubits, reps=num_reps, alternate=alternate, barrier=True)  # Full PQC
+
+    # Example:
+    # feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
+    # feature_map = piramidal_circuit(num_qubits, num_reps=1, piramidal=False, barrier=False)
+    # feature_map = dummy_circ(num_qubits, num_reps = 1, barrier = True)
+    # feature_map = TwoLocal(num_qubits, ['rx', 'rz'], 'cx', 'linear', reps = 1, insert_barriers=True, skip_final_rotation_layer=True)
+    feature_map = circuit9(num_qubits, num_reps = 1, barrier = True)
+    var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1,
+                          insert_barriers=True, skip_final_rotation_layer=True)
+
+    # Other examples:
+    # ring_circ(num_qubits, num_reps=1, barrier=False)  # Ring circ (n.15 from Kim et al.)
+    # piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False) # Piramidal circ (n.12 from Kim et al.)
+
+    # Build the PQC
+    ansatz = general_qnn(num_reps, feature_map=feature_map,
+                         var_ansatz=var_ansatz, alternate=alternate, barrier=False)
+
+
+    return ansatz
+
 
 def main(num_qubits, alternate = True, backend = 'Aer', plot = False):
     """
-    Evaluate entanglement entropy for multiple repetitions of a variational ansats, and fixed number of qubits.
+    Evaluate entanglement entropy for multiple repetitions of the variational ansatz and fixed number of qubits.
     """
 
     # Entanglement in circuit and haar
@@ -112,31 +161,25 @@ def main(num_qubits, alternate = True, backend = 'Aer', plot = False):
     for num_reps in range(1, max_rep):
         print(f"\n__Reps {num_reps}/{max_rep}")
 
-        # Select circuit
-        # ansatz = Abbas_QNN(num_qubits, reps=num_reps, alternate=alternate, barrier=True)  # AbbassQNN
-        feature_map = ring_circ(num_qubits, num_reps=1, barrier=False)[0]  # Ring circ
-
-        # General QNN
-        #feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
-        var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
-        ansatz = general_qnn(num_reps, feature_map=feature_map, var_ansatz=var_ansatz, alternate=alternate, barrier=False)
+        # Pick a PQC (modify the function)
+        ansatz = pick_circuit(num_qubits, num_reps, alternate = alternate)
 
         # Run simulation and save result
-        tmp = ent_char(num_qubits, num_reps, ansatz=ansatz, backend=backend, alternate=alternate)
+        tmp = ent_char(ansatz=ansatz, backend=backend)
         ent_list.append(tmp)
 
     ent_list = np.array(ent_list)
     
-    #################################
-    # Max entanglement for a system of dimension d, is d.
+    ####################################################################
+    # MAX ENTANGLEMENT for a system of dimension d, is d.
     max_ent = [-np.log(1/2**n) for n in range(1, int(num_qubits/2)+1)]
     # Just for fixing shapes in plotting.
     if num_qubits % 2 == 0:
         max_ent = max_ent + max_ent[::-1][1:]
     else:
         max_ent = max_ent + max_ent[::-1]
-    
-    ###################################
+    ####################################################################
+
     # Plot
     if plot:
         fig = plt.figure(figsize=(8, 5))
@@ -163,8 +206,8 @@ def main(num_qubits, alternate = True, backend = 'Aer', plot = False):
 
 if __name__ == '__main__':
 
-    #seed = 32
-    #np.random.seed(seed)
+    seed = 32
+    np.random.seed(seed)
 
     # Quantum Cirucit structure
     #num_qubits = 8
@@ -175,7 +218,8 @@ if __name__ == '__main__':
     backend = 'Aer'
 
     max_num_qubits = 10
-    entanglement_scaling(max_num_qubits, backend=backend, alternate=alternate)
+    entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate)
+
     #main(num_qubits, backend=backend, alternate=alternate)
     #ent_vs_reps(num_qubits, alternate = alternate, backend=backend)
     #alt_comparison(num_qubits, backend=backend)
