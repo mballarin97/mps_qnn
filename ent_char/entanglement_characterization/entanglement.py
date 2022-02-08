@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import json
+import os
 
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
@@ -14,22 +15,43 @@ def removekey(d, keys):
         del r[key]
     return r
 
-def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', alternate = True):
+def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/ent_scaling/', 
+    alternate = True, max_bond_dim=2):
     """
     Study of the total entanglement in the MPS state, varying the number of qubits. 
+
+    Parameters
+    ----------
+    max_num_qubits : array-like or int, optional
+        If int, maximum number of qubits. If array-like, interested range of qubits. by default 10
+    backend : str, optional
+        Computational backend. Possible: 'Aer', 'MPS'. by default 'Aer'
+    path : str, optional
+        path for saving data, by default './data/ent_scaling/'
+    alternate : bool, optional
+        If the feature map and the ansatz should be reproduced in an alternate
+        arrangement, by default True
+    max_bond_dim : int, optional
+        Maximum bond dimension for MPS backend. Ignored if the backend is Aer, by default 2
     """
+    if isinstance(max_num_qubits, int):
+        qubits_range = np.arange(4, max_num_qubits+1, 2, dtype=int)
+    else:
+        qubits_range = max_num_qubits
 
     ent_data = []
-    for nqubits in range(4, max_num_qubits+1, 2):
-        tmp = ent_vs_reps(nqubits, backend=backend, alternate=alternate)
+    for nqubits in qubits_range:
+        tmp = ent_vs_reps(nqubits, backend=backend, alternate=alternate, max_bond_dim=max_bond_dim)
         ent_data.append(tmp)
 
     # Save data
     path = './data/ent_scaling/'
+    if not os.path.isdir(path):
+        os.mkdir(path) 
 
     timestamp = time.localtime()
     save_as = time.strftime("%Y-%m-%d_%H-%M-%S", timestamp) + '_' + str(np.random.randint(0, 1000))
-    name = path + save_as
+    name = os.path.join(path, save_as)
 
     # Save details of the ansatz
     ansatz = pick_circuit(2, 2, alternate=alternate)
@@ -59,10 +81,26 @@ def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', alternate = True)
     #plt.legend()
     #plt.show()
 
-def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True):
+def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=2):
     """
     Evaluate the total entanglement (sum of entanglement accross bipartitions) in the MPS quantum state, 
     for various repetitions of the ansatz, for a fixed number of qubits.
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits in the circuit
+    backend : str, optional
+        Computational backend. Possible: 'Aer', 'MPS'. by default 'Aer'
+    alternate : bool, optional
+        [description], by default True
+    max_bond_dim : int, optional
+        Maximum bond dimension for MPS backend. Ignored if the backend is Aer, by default 2
+
+    Returns
+    -------
+    [type]
+        [description]
     """
     
     ent_list, _ = main(num_qubits, backend = backend, alternate = alternate)
@@ -135,12 +173,12 @@ def pick_circuit(num_qubits, num_reps, alternate = True):
     # Abbas_QNN(num_qubits, reps=num_reps, alternate=alternate, barrier=True)  # Full PQC
 
     # Example:
-    # feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
+    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
     # feature_map = piramidal_circuit(num_qubits, num_reps=1, piramidal=False, barrier=False)
     # feature_map = dummy_circ(num_qubits, num_reps = 1, barrier = True)
-    # feature_map = TwoLocal(num_qubits, ['rx', 'rz'], 'cx', 'linear', reps = 1, insert_barriers=True, skip_final_rotation_layer=True)
-    feature_map = circuit9(num_qubits, num_reps = 1, barrier = True)
-    var_ansatz = circuit9(num_qubits, num_reps=1, barrier=True)
+    var_ansatz = TwoLocal(num_qubits, ['ry'], 'cx', 'linear', reps = 1, insert_barriers=True, skip_final_rotation_layer=True)
+    #feature_map = circuit9(num_qubits, num_reps = 1, barrier = True)
+    #var_ansatz = circuit9(num_qubits, num_reps=1, barrier=True)
 
     # Other examples:
     # ring_circ(num_qubits, num_reps=1, barrier=False)  # Ring circ (n.15 from Kim et al.)
@@ -154,19 +192,22 @@ def pick_circuit(num_qubits, num_reps, alternate = True):
     return ansatz
 
 
-def main(num_qubits, alternate = True, backend = 'Aer', plot = False):
+def main(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_dim=2):
     """
     Evaluate entanglement entropy for multiple repetitions of the variational ansatz and fixed number of qubits.
     """
 
     # Entanglement in circuit and haar
     ent_list = []
-    max_rep = int(1.5*num_qubits)
+    max_rep = 7#int(1.5*num_qubits)
     for num_reps in range(1, max_rep):
         print(f"\n__Reps {num_reps}/{max_rep}")
 
         # Pick a PQC (modify the function)
         ansatz = pick_circuit(num_qubits, num_reps, alternate = alternate)
+        data = ansatz.metadata 
+        data['max_bond_dim'] = max_bond_dim
+        ansatz.metadata = data
 
         # Run simulation and save result
         tmp = ent_char(ansatz=ansatz, backend=backend)
@@ -221,8 +262,9 @@ if __name__ == '__main__':
     backend = 'MPS'
     #backend = 'Aer'
 
-    max_num_qubits = 42
-    entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate)
+    max_num_qubits = np.arange(20, 51, 10)
+    entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate,
+        max_bond_dim=1024, path='./data/ent_scaling/mps/')
 
     #main(num_qubits, backend=backend, alternate=alternate)
     #ent_vs_reps(num_qubits, alternate = alternate, backend=backend)

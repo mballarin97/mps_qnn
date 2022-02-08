@@ -27,7 +27,7 @@ def run_mps(qc, max_bond_dim=10):
 
     results = run_simulation(qc, convergence_parameters=conv_params,
                              transpilation_parameters=trans_params, do_entanglement=True,
-                             approach='PY', save_mps='N', do_statevector=True)
+                             approach='PY', save_mps='N', do_statevector=False)
 
     return results
 
@@ -110,7 +110,7 @@ def entanglement_bond(statevector):
 
     return np.array(res)
 
-def mps_simulation(qc, random_params):
+def mps_simulation(qc, random_params, max_bond_dim=2):
     """"
     Simulation using MPS to study bond entanglement.
     """
@@ -119,7 +119,7 @@ def mps_simulation(qc, random_params):
     for idx, params in enumerate(random_params):
         print(f"Run {idx}/{len(random_params)}", end="\r")
         qc = transpile(qc, sim_bknd)
-        mps_results = run_circuit(qc, params, max_bond_dim=25)
+        mps_results = run_circuit(qc, params, max_bond_dim=max_bond_dim)
         mps_results_list.append(mps_results)
 
     mps_entanglement = np.array([res.entanglement for res in mps_results_list])
@@ -168,6 +168,7 @@ def main(ansatz = None, backend = 'Aer'):
     num_qubits = metadata['num_qubits']
     num_reps = metadata['num_reps']
     alternate = metadata['alternate']
+    max_bond_dim = metadata['max_bond_dim']
 
     ######################################################
     # GENERATE RANDOM PARAMETERS (both inputs and weights)
@@ -177,7 +178,7 @@ def main(ansatz = None, backend = 'Aer'):
     ######################################################
     # SIMULATION WITH MPS or Aer
     if backend == 'MPS':    
-        ent_means, ent_std = mps_simulation(ansatz, random_params)
+        ent_means, ent_std = mps_simulation(ansatz, random_params, max_bond_dim)
     elif backend == 'Aer':   
         ent_means, ent_std = aer_simulation(ansatz, random_params)
     else:
