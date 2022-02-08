@@ -67,9 +67,14 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True):
     
     ent_list, _ = main(num_qubits, backend = backend, alternate = alternate)
 
-    tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # sum accorss all bonds for a fixed repetition 
-    tot_ent_per_rep_std = np.sum(ent_list[:, 1, :], axis=1) # sum accorss all bonds for a fixed repetition
-    haar_ent = np.sum(ent_list[:, 2, :], axis=1) # sum accorss all bonds for a fixed repetition 
+    # Total Entanglement, sum accorss all bonds for a fixed repetition
+    tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # 
+
+    # Std deviation propagation for Total Entanglement, sum accorss all bonds for a fixed repetition
+    tot_ent_per_rep_std = np.sqrt(np.sum(np.array(ent_list[:, 1, :])**2, axis=1))
+
+    # Total Haar Entanglement, sum accorss all bonds for a fixed repetition
+    haar_ent = np.sum(ent_list[:, 2, :], axis=1) 
    
     #num_reps = len(ent_list)
     #fig = plt.figure(figsize=(8,5))
@@ -77,7 +82,7 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True):
     #plt.hlines(haar_ent[0], 1, num_reps, ls='--', color='r')
     #plt.show()
 
-    return tot_ent_per_rep, haar_ent[0]
+    return tot_ent_per_rep, tot_ent_per_rep_std, haar_ent[0]
 
 
 def alt_comparison(num_qubits, ansatz = None, backend = 'Aer'):
@@ -135,8 +140,7 @@ def pick_circuit(num_qubits, num_reps, alternate = True):
     # feature_map = dummy_circ(num_qubits, num_reps = 1, barrier = True)
     # feature_map = TwoLocal(num_qubits, ['rx', 'rz'], 'cx', 'linear', reps = 1, insert_barriers=True, skip_final_rotation_layer=True)
     feature_map = circuit9(num_qubits, num_reps = 1, barrier = True)
-    var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1,
-                          insert_barriers=True, skip_final_rotation_layer=True)
+    var_ansatz = circuit9(num_qubits, num_reps=1, barrier=True)
 
     # Other examples:
     # ring_circ(num_qubits, num_reps=1, barrier=False)  # Ring circ (n.15 from Kim et al.)
@@ -206,7 +210,7 @@ def main(num_qubits, alternate = True, backend = 'Aer', plot = False):
 
 if __name__ == '__main__':
 
-    seed = 32
+    seed = 43
     np.random.seed(seed)
 
     # Quantum Cirucit structure
@@ -214,10 +218,10 @@ if __name__ == '__main__':
     alternate = True
 
     # Choose simulation backend
-    #backend = 'MPS'
-    backend = 'Aer'
+    backend = 'MPS'
+    #backend = 'Aer'
 
-    max_num_qubits = 10
+    max_num_qubits = 42
     entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate)
 
     #main(num_qubits, backend=backend, alternate=alternate)
