@@ -5,7 +5,7 @@ import json
 
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
-from entanglement_characterization import main as ent_char
+from run_simulations import main as ent_char
 from circuits import *
 
 def removekey(d, keys):

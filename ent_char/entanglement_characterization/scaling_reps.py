@@ -11,7 +11,7 @@ from scipy.stats import linregress
 import qiskit as qk
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
-from entanglement_characterization import main as ent_char
+from run_simulations import main as ent_char
 
 class HiddenPrints:
     def __enter__(self):
