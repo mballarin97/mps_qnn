@@ -178,13 +178,12 @@ def main(ansatz = None, backend = 'Aer'):
     num_qubits = metadata['num_qubits']
     num_reps = metadata['num_reps']
     alternate = metadata['alternate']
-    
+
     try:
-        metadata['max_bond_dim']
+        max_bond_dim = metadata['max_bond_dim']
     except: 
         max_bond_dim = 1_024
-    else: 
-        max_bond_dim = metadata['max_bond_dim']
+             
 
     ######################################################
     # GENERATE RANDOM PARAMETERS (both inputs and weights)
@@ -234,8 +233,8 @@ if __name__ == '__main__':
     np.random.seed(seed)
 
     # Quantum Cirucit structure
-    num_qubits = 5
-    num_reps = 20
+    num_qubits = 4
+    num_reps = 4
     alternate = True
 
     # Select a feature map and a variational block
@@ -249,7 +248,7 @@ if __name__ == '__main__':
     ansatz = general_qnn(num_reps, feature_map = feature_map, var_ansatz = var_ansatz, alternate = alternate, barrier = False)
 
     # Choose simulation backend
-    #backend = 'MPS'
-    backend = 'Aer'
+    backend = 'MPS'
+    #backend = 'Aer'
 
     main(ansatz, backend=backend)
