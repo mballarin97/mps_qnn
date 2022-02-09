@@ -31,7 +31,6 @@ def run_mps(qc, max_bond_dim=1024):
 
     return results
 
-
 def run_circuit(qc, parameters, max_bond_dim=1024):
     """
     Assigns parameters to the quantum circuits and runs it with python-MPS.
@@ -41,6 +40,20 @@ def run_circuit(qc, parameters, max_bond_dim=1024):
     results = run_mps(qc, max_bond_dim=max_bond_dim)
     return results
 
+def harmonic(n):
+    """
+    Approximation of the Harmonic series H(n) = \sum_{k=1}^n 1/k ~ ln(n) + gamma + O(1/n)
+    """
+    return np.log(n) + np.euler_gamma
+
+def approx_haar_entanglement(num_qubits, num_A):
+    """
+    Approximate expression of the haar_entanglement function, very accurate for num_qubits > 10 (error < 1%).
+    """
+    num_A = min([num_A, num_qubits - num_A])
+    d = (2**num_A - 1) / (2**(num_qubits - num_A + 1))
+    ent = harmonic(2**num_qubits) - harmonic(2**(num_qubits - num_A)) - d
+    return ent
 
 def haar_entanglement(num_qubits, num_A, log_base = 'e'):
     """
@@ -49,10 +62,13 @@ def haar_entanglement(num_qubits, num_A, log_base = 'e'):
     Formula applies for num_A \leq num_B.
     """
 
+    # Pick the smallest bi-partition
+    num_A = min([num_A, num_qubits - num_A])
+
     dim_qubit = 2  # qubit has dimension 2
     da = dim_qubit ** num_A  # dimension of partition A
     db = dim_qubit ** (num_qubits - num_A)  # dimension of partition B
-
+    
     ent = np.sum([1.0 / j for j in range(1+db, da * db + 1)])
     ent -= (da - 1) / (2*db)
 
@@ -61,23 +77,17 @@ def haar_entanglement(num_qubits, num_A, log_base = 'e'):
 
     return ent
 
-
 def haar_bond_entanglement(num_qubits):
     """
-    Evaluates the expected value of the entanglement bond if the states were Haar distributed.
-    Just as the haar_entanglement function, but with reshaping for having consistent dimension.
+    Evaluates the expected value of the entanglement at each bond if the states were Haar distributed.
     """
 
-    entanglement_bond = [haar_entanglement(num_qubits, i) for i in range(1, int(num_qubits / 2)+1)]
-    
-    # Just for fixing lenght and indexes
-    if num_qubits % 2 == 0:
-        entanglement_bond = entanglement_bond + entanglement_bond[::-1][1:]
+    if num_qubits < 20:
+        entanglement_bonds = [haar_entanglement(num_qubits, i) for i in range(1, num_qubits)]
     else:
-        entanglement_bond = entanglement_bond + entanglement_bond[::-1]
-        
-    return entanglement_bond
-
+        entanglement_bonds = [approx_haar_entanglement(num_qubits, i) for i in range(1, num_qubits)]
+    
+    return entanglement_bonds
 
 def entanglement_entropy(statevector, idx_to_trace=None):
     """
@@ -168,7 +178,13 @@ def main(ansatz = None, backend = 'Aer'):
     num_qubits = metadata['num_qubits']
     num_reps = metadata['num_reps']
     alternate = metadata['alternate']
-    max_bond_dim = metadata['max_bond_dim']
+    
+    try:
+        metadata['max_bond_dim']
+    except: 
+        max_bond_dim = 1_024
+    else: 
+        max_bond_dim = metadata['max_bond_dim']
 
     ######################################################
     # GENERATE RANDOM PARAMETERS (both inputs and weights)
@@ -186,14 +202,11 @@ def main(ansatz = None, backend = 'Aer'):
 
     ######################################################
     # ENTANGLEMENT STUDY
-    print("Measured entanglement =     ", np.round(ent_means,4))
+    print("Measured entanglement =     ", np.round(ent_means, 4))
 
     # Expected entanglement accross cut lines if Haar distributed
-    if num_qubits<20:
-        ent_haar = haar_bond_entanglement(num_qubits)
-        print("Haar entanglement at bond = ", np.round(ent_haar,4))
-    else:
-        ent_haar = np.zeros_like(ent_means)
+    ent_haar = haar_bond_entanglement(num_qubits)
+    print("Haar entanglement at bond = ", np.round(ent_haar, 4))
 
     ######################################################
     # PLOT
@@ -222,7 +235,7 @@ if __name__ == '__main__':
 
     # Quantum Cirucit structure
     num_qubits = 5
-    num_reps = 5
+    num_reps = 20
     alternate = True
 
     # Select a feature map and a variational block

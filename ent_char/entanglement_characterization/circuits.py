@@ -2,6 +2,11 @@
 Circuit architectures not present in the qiskit package.
 Each function returns a Variational Circuit and also a string of its name, for logging reasons.
 
+When adding new circuits, do it in the same format of the other, by:
+1. Providing an understandable name to the circuit;
+2. Add entanglement map in the metadata information;
+3. If other data is needed, then update the general_qnn function to include that data; 
+
 Circuit numbers from Fig. 2 of [1].
 Abbass QNN from [2].
 
