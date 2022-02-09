@@ -35,7 +35,7 @@ def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/en
         Maximum bond dimension for MPS backend. Ignored if the backend is Aer, by default 2
     """
     if isinstance(max_num_qubits, int):
-        qubits_range = np.arange(2, max_num_qubits+1, 2, dtype=int)
+        qubits_range = np.arange(4, max_num_qubits+1, 2, dtype=int)
     else:
         qubits_range = max_num_qubits
 
@@ -147,7 +147,7 @@ def pick_circuit(num_qubits, num_reps, alternate = True):
 
     # Example: Abbass-QNN
     # feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
-    # var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
+    # var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps = 1, insert_barriers=True, skip_final_rotation_layer=True)
     # or already defined full PQC
     # Abbas_QNN(num_qubits, reps=num_reps, alternate=alternate, barrier=True)  # Full PQC
 
@@ -159,8 +159,8 @@ def pick_circuit(num_qubits, num_reps, alternate = True):
     # - ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
     # - TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
 
-    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
-    var_ansatz = TwoLocal(num_qubits, ['ry'], 'cx', 'linear', reps = 1, insert_barriers=True, skip_final_rotation_layer=True)
+    feature_map = circuit9(num_qubits, num_reps=1, barrier=True)
+    var_ansatz = circuit9(num_qubits, num_reps=1, barrier=True)
 
     # Build the PQC
     ansatz = general_qnn(num_reps, feature_map=feature_map,
@@ -226,7 +226,7 @@ def main(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_d
 
 if __name__ == '__main__':
 
-    seed = 43
+    seed = 42
     np.random.seed(seed)
 
     # Quantum Cirucit structure
