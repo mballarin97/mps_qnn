@@ -16,7 +16,7 @@ def removekey(d, keys):
     return r
 
 def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/ent_scaling/', 
-    alternate = True, max_bond_dim=2):
+    alternate = True, max_bond_dim=1024):
     """
     Study of the total entanglement in the MPS state, varying the number of qubits. 
 
@@ -81,7 +81,7 @@ def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/en
     #plt.legend()
     #plt.show()
 
-def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=2):
+def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=1024):
     """
     Evaluate the total entanglement (sum of entanglement accross bipartitions) in the MPS quantum state, 
     for various repetitions of the ansatz, for a fixed number of qubits.
@@ -130,7 +130,7 @@ def alt_comparison(num_qubits, ansatz = None, backend = 'Aer'):
 
     res = []
     for alternate in [True, False]:
-        ent_list, max_ent = main(num_qubits, alternate=alternate, backend='Aer', plot = False)
+        ent_list, max_ent = main(num_qubits, alternate=alternate, backend=backend, plot = False)
         res.append(ent_list)
     res = np.array(res)
 
@@ -192,7 +192,7 @@ def pick_circuit(num_qubits, num_reps, alternate = True):
     return ansatz
 
 
-def main(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_dim=2):
+def main(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_dim=1024):
     """
     Evaluate entanglement entropy for multiple repetitions of the variational ansatz and fixed number of qubits.
     """
@@ -262,7 +262,7 @@ if __name__ == '__main__':
     backend = 'MPS'
     #backend = 'Aer'
 
-    max_num_qubits = np.arange(20, 51, 10)
+    max_num_qubits = [30]#np.arange(30, 51, 10)
     entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate,
         max_bond_dim=1024, path='./data/ent_scaling/mps/')
 

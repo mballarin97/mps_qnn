@@ -17,7 +17,7 @@ from qiskit.quantum_info import DensityMatrix
 from qiskit import Aer, transpile
 sim_bknd = Aer.get_backend('statevector_simulator')
 
-def run_mps(qc, max_bond_dim=10):
+def run_mps(qc, max_bond_dim=1024):
     """
     Runs a quantum circuit (parameters already numerical) with MPS.
     """
@@ -32,7 +32,7 @@ def run_mps(qc, max_bond_dim=10):
     return results
 
 
-def run_circuit(qc, parameters, max_bond_dim=10):
+def run_circuit(qc, parameters, max_bond_dim=1024):
     """
     Assigns parameters to the quantum circuits and runs it with python-MPS.
     """
@@ -110,7 +110,7 @@ def entanglement_bond(statevector):
 
     return np.array(res)
 
-def mps_simulation(qc, random_params, max_bond_dim=2):
+def mps_simulation(qc, random_params, max_bond_dim=1024):
     """"
     Simulation using MPS to study bond entanglement.
     """
@@ -189,8 +189,11 @@ def main(ansatz = None, backend = 'Aer'):
     print("Measured entanglement =     ", np.round(ent_means,4))
 
     # Expected entanglement accross cut lines if Haar distributed
-    ent_haar = haar_bond_entanglement(num_qubits)
-    print("Haar entanglement at bond = ", np.round(ent_haar,4))
+    if num_qubits<20:
+        ent_haar = haar_bond_entanglement(num_qubits)
+        print("Haar entanglement at bond = ", np.round(ent_haar,4))
+    else:
+        ent_haar = np.zeros_like(ent_means)
 
     ######################################################
     # PLOT
