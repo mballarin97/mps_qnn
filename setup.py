@@ -20,7 +20,7 @@ setuptools.setup(
     version = version_module.__version__,
     author = "Marco Ballarin, Stefano Mangini, Riccardo Mengoni",
     author_email = "marco97.ballarin@gmail.com",
-    description = "Interface for quantum circuits to MPS",
+    description = "Characterization of parametrized quantum circuits",
     long_description = long_description,
     long_description_content_type = "text/markdown",
     url = "https://github.com/mballarin97/MPS-QNN",
@@ -31,10 +31,10 @@ setuptools.setup(
     ],
     package_dir = {
         "qcircha": "qcircha",
-        #"qcomps.circuit" : "qcomps/circuit",
+        "qcircha.entanglement" : "qcircha/entanglement",
         #"qcomps.qec" : "qcomps/qec",
     },
     #packages = setuptools.find_packages(where = "qcmps"),
-    packages = ['qcircha'], #, 'qcomps.circuit', 'qcomps.qec'],
+    packages = ['qcircha', 'qcircha.entanglement'],#, 'qcomps.qec'],
     python_requires=">=3.6",
 )
