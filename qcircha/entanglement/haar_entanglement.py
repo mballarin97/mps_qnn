@@ -126,3 +126,25 @@ def haar_bond_entanglement(num_qubits):
         entanglement_bonds = [approx_haar_entanglement(num_qubits, i) for i in range(1, num_qubits)]
     
     return entanglement_bonds
+
+def haar_discrete(xmin, delta, n):
+    """
+    Generate a discrete distribution of Haar probabilities
+
+    TODO : comment function
+
+    Parameters
+    ----------
+    xmin : _type_
+        Minimum x value
+    delta : _type_
+        _description_
+    n : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    return (1. - xmin)**(n-1) - (1 - xmin - delta)**(n-1)
