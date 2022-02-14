@@ -6,13 +6,12 @@ import os
 
 from qcircha.circuit_selector import pick_circuit
 from qcircha.entanglement_characterization import entanglement_characterization
-from qcircha.circuits import *
 from qcircha.utils import removekey
 
 __all__ = ['entanglement_scaling', 'ent_vs_reps', 'compute_bond_entanglement']
 
-def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/ent_scaling/', 
-    alternate = True, max_bond_dim=1024):
+def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_ansatz='TwoLocal',
+    backend = 'Aer', path = './data/ent_scaling/', alternate = True, max_bond_dim=1024):
     """
     Study of the total entanglement in the MPS state, varying the number of qubits,
     and save them in `path` in a file with the format "%Y-%m-%d_%H-%M-%S".
@@ -21,6 +20,14 @@ def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/en
     ----------
     max_num_qubits : array-like or int, optional
         If int, maximum number of qubits. If array-like, interested range of qubits. by default 10
+    feature_map : str or :py:class:`QuantumCircuit`, optional
+        Type of feature map. Available options in the description. If a
+        :py:class:`QuantumCircuit` it is used instead of the default ones.
+        Default to 'ZZFeatureMap'.
+    var_ansatz : str or :py:class:`QuantumCircuit`, optional
+        Type of feature map. Available options in the description. If a
+        :py:class:`QuantumCircuit` it is used instead of the default ones.
+        Default to 'TwoLocal'.
     backend : str, optional
         Computational backend. Possible: 'Aer', 'MPS'. by default 'Aer'
     path : str, optional
@@ -42,7 +49,8 @@ def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/en
 
     ent_data = []
     for nqubits in qubits_range:
-        tmp = ent_vs_reps(nqubits, backend=backend, alternate=alternate, max_bond_dim=max_bond_dim)
+        tmp = ent_vs_reps(nqubits, feature_map=feature_map, ansatz=var_ansatz,
+            backend=backend, alternate=alternate, max_bond_dim=max_bond_dim)
         ent_data.append(tmp)
 
     # Save data
@@ -67,7 +75,7 @@ def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/en
     np.save(name, ent_data, allow_pickle=True)
 
 
-def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=1024):
+def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', backend = 'Aer', alternate = True, max_bond_dim=1024):
     """
     Evaluate the total entanglement (sum of entanglement accross bipartitions) in the MPS quantum state, 
     for various repetitions of the ansatz, for a fixed number of qubits.
@@ -76,6 +84,14 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=1024
     ----------
     num_qubits : int
         Number of qubits in the circuit
+    feature_map : str or :py:class:`QuantumCircuit`, optional
+        Type of feature map. Available options in the description. If a
+        :py:class:`QuantumCircuit` it is used instead of the default ones.
+        Default to 'ZZFeatureMap'.
+    var_ansatz : str or :py:class:`QuantumCircuit`, optional
+        Type of feature map. Available options in the description. If a
+        :py:class:`QuantumCircuit` it is used instead of the default ones.
+        Default to 'TwoLocal'.
     backend : str, optional
         Computational backend. Possible: 'Aer', 'MPS'. by default 'Aer'
     alternate : bool, optional
@@ -94,7 +110,8 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=1024
         Sum of the Haar entanglement along the bipartitions
     """
     
-    ent_list, _ = compute_bond_entanglement(num_qubits, backend = backend, alternate = alternate, max_bond_dim = max_bond_dim)
+    ent_list, _ = compute_bond_entanglement(num_qubits, feature_map=feature_map,
+        ansatz=var_ansatz, backend = backend, alternate = alternate, max_bond_dim = max_bond_dim)
 
     # Total Entanglement, sum accorss all bonds for a fixed repetition
     tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # 
@@ -107,7 +124,8 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=1024
    
     return tot_ent_per_rep, tot_ent_per_rep_std, haar_ent[0]
 
-def compute_bond_entanglement(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_dim = None):
+def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', alternate = True,
+    backend = 'Aer', plot = False, max_bond_dim = None):
     """
     Evaluate entanglement entropy accross bonds, varying the repetitions of the variational ansatz,
     for a fixed number of qubits.
@@ -116,6 +134,14 @@ def compute_bond_entanglement(num_qubits, alternate = True, backend = 'Aer', plo
     ----------
     num_qubits : int
         Number of qubits
+    feature_map : str or :py:class:`QuantumCircuit`, optional
+        Type of feature map. Available options in the description. If a
+        :py:class:`QuantumCircuit` it is used instead of the default ones.
+        Default to 'ZZFeatureMap'.
+    var_ansatz : str or :py:class:`QuantumCircuit`, optional
+        Type of feature map. Available options in the description. If a
+        :py:class:`QuantumCircuit` it is used instead of the default ones.
+        Default to 'TwoLocal'.
     alternate : bool, optional
         If the feature map and the variational ansatz should be alternated in the
         disposition (True) or if first apply ALL the feature map repetitions and
@@ -144,7 +170,8 @@ def compute_bond_entanglement(num_qubits, alternate = True, backend = 'Aer', plo
         print(f"\n__Reps {num_reps}/{max_rep}")
 
         # Pick a PQC (modify the function)
-        ansatz = pick_circuit(num_qubits, num_reps, alternate = alternate)
+        ansatz = pick_circuit(num_qubits, num_reps, feature_map=feature_map,
+            ansatz=var_ansatz, alternate = alternate)
         
         # If MPS, add max_bond_dim to circuit's metadata
         if backend == "MPS":
@@ -184,26 +211,4 @@ def compute_bond_entanglement(num_qubits, alternate = True, backend = 'Aer', plo
         plt.show()
 
     return ent_list, max_ent
-
-if __name__ == '__main__':
-
-    seed = 42
-    np.random.seed(seed)
-
-    # Quantum Cirucit structure
-    #num_qubits = 8
-    alternate = True
-
-    # Choose simulation backend
-    #backend = 'MPS'
-    backend = 'Aer'
-
-    max_num_qubits = 6 #np.arange(30, 51, 10)
-    entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate,
-                         max_bond_dim=1024, path='./data/ent_scaling/mps/')
-
-    #main(num_qubits, backend=backend, alternate=alternate)
-    #ent_vs_reps(num_qubits, alternate = alternate, backend=backend)
-    #alt_comparison(num_qubits, backend=backend)
-
     
