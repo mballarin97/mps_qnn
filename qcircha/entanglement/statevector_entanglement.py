@@ -124,10 +124,10 @@ def entanglement_bond(statevector):
 def von_neumann_entropy(eigvs):
     """
     Compute the Von Neumann entanglement entropy of a density matrix
-    with eigenvalues :math:`\lambda_i`
+    with eigenvalues :math:`\\lambda_i`
 
     .. math::
-        S_V = -Tr(\rho\ln\rho)=-\sum_{i} \lambda_i\log \lambda_i
+        S_V = -Tr(\\rho\ln\\rho)=-\\sum_{i} \\lambda_i\\log \\lambda_i
 
     Parameters
     ----------

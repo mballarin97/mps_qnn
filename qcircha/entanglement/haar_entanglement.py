@@ -12,10 +12,10 @@ def _harmonic(n):
     This approximation is really useful to speed up the computation of the
     Haar entanglement of a circuit, which is exponential to compute if computed
     exactly. The error of the approximation is exponentially small, since in
-    our case :math:`n\propto 2^{num_qubits}`.
+    our case :math:`n\\propto 2^{num_qubits}`.
     
     .. math::
-        H(n) = \sum_{k=1}^n \frac{1}{k} ~ \ln(n) + \gamma + O(\frac{1}{n} )
+        H(n) = \\sum_{k=1}^n \\frac{1}{k} ~ \\ln(n) + \\gamma + O(\\frac{1}{n} )
 
     Parameters
     ----------
@@ -58,7 +58,7 @@ def haar_entanglement(num_qubits, num_A, log_base = 'e'):
     taken from Commun. Math. Phys. 265, 95–117 (2006), Lemma II.4.
     Considering a system of num_qubits, bi-partition it in system A
     with num_A qubits, and B with the rest. 
-    Formula applies for :math:`num_A \leq num_B`.
+    Formula applies for :math:`num_A \\leq num_B`.
 
     .. warning::
         This function computational time scales exponentially with

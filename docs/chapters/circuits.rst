@@ -1,8 +1,8 @@
-Interface
+Circuits
 =========
 
-.. automodule:: qchirca.circuit_selector
+.. automodule:: qcircha.circuit_selector
   :members:
 
-.. automodule:: qchirca.circuits
+.. automodule:: qcircha.circuits
   :members:

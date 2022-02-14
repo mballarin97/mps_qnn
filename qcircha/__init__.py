@@ -9,6 +9,7 @@ from qcircha.circuit_selector import *
 from qcircha.circuits import *
 from qcircha.entanglement_characterization import *
 from qcircha.experiments import *
+from qcircha.expressivity import *
 
 
 from qcircha.version import __version__

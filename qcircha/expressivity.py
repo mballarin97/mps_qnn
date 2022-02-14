@@ -14,10 +14,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_theme()
 
-from circuits import *
-from entanglement_characterization import entanglement_characterization
-from entanglement.haar_entanglement import haar_discrete
-from utils import removekey
+from qcircha.circuits import *
+from qcircha.entanglement_characterization import entanglement_characterization
+from qcircha.entanglement.haar_entanglement import haar_discrete
+from qcircha.utils import removekey
 
 
 def kl_divergence(p, q):

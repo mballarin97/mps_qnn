@@ -43,7 +43,7 @@ def removekey(dictionary, keys):
 
     Parameters
     ----------
-    d : dict
+    dictionary : dict
         Dictionary from where we remove the keys
     keys : array-like
         keys to be removed

@@ -1,5 +1,5 @@
 Welcome to qcircha's documentation!
-==================================
+===================================
 
 **QCirCha** (Quantum Circuit Characterization) is a Python library to characterize parametric quantum circuits.
 

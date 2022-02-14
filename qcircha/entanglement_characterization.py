@@ -12,9 +12,9 @@ import numpy as np
 
 from qiskit import Aer, transpile
 
-from entanglement.haar_entanglement import haar_bond_entanglement
-from entanglement.statevector_entanglement import entanglement_bond
-from utils import logger
+from qcircha.entanglement.haar_entanglement import haar_bond_entanglement
+from qcircha.entanglement.statevector_entanglement import entanglement_bond
+from qcircha.utils import logger
 
 __all__ = ['entanglement_characterization']
 

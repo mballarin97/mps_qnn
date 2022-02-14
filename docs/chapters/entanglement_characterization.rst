@@ -1,5 +1,5 @@
 Entanglement Characterization
 ===============================
 
-.. automodule:: qchirca.entanglement_characterization
+.. automodule:: qcircha.entanglement_characterization
     :members:

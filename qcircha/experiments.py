@@ -4,11 +4,10 @@ import time
 import json
 import os
 
-from circuit_selector import pick_circuit
-
-from entanglement_characterization import entanglement_characterization
-from circuits import *
-from utils import removekey
+from qcircha.circuit_selector import pick_circuit
+from qcircha.entanglement_characterization import entanglement_characterization
+from qcircha.circuits import *
+from qcircha.utils import removekey
 
 __all__ = ['entanglement_scaling', 'ent_vs_reps', 'compute_bond_entanglement']
 

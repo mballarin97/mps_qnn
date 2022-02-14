@@ -5,9 +5,9 @@ Multiple analysis of the entanglement in the MPS circuit
 
 # Import necessary modules
 from qiskit import QuantumCircuit
-
-from circuits import general_qnn, ring_circ, piramidal_circuit, dummy_circ, circuit9
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
+
+from qcircha.circuits import general_qnn, ring_circ, piramidal_circuit, dummy_circ, circuit9
 
 """
 TODO: This function is not really clear. What does it do? Why?
@@ -29,14 +29,11 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
     is ensured by the :py:func:`general_qnn`.
 
     Available circuits:
-    - 'ZZFeatureMap' : circuit with linear entanglement, used as feature map
-        in the Power of Quantum Neural networks by Abbas et al.
-    - 'TwoLocal' : circuit with linear entanglement, used as ansatz in
-        the Power of Quantum Neural networks by Abbas et al.
-    - 'Ring' : circuit with ring entanglement, defined in  
-        (n.15 from Kim et al.)
-    - 'Piramidal' : circuit with linear entanglement and a piramidal
-        structure, defined in (n.12 from Kim et al.)
+
+    - 'ZZFeatureMap' : circuit with linear entanglement, used as feature map in the Power of Quantum Neural networks by Abbas et al.
+    - 'TwoLocal' : circuit with linear entanglement, used as ansatz in the Power of Quantum Neural networks by Abbas et al.
+    - 'Ring' : circuit with ring entanglement, defined in   (n.15 from Kim et al.)
+    - 'Piramidal' : circuit with linear entanglement and a piramidal structure, defined in (n.12 from Kim et al.)
     - 'dummy' : describe
     - 'circuit9' : circuit number 9 from Kim et al.
 
