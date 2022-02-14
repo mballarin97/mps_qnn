@@ -4,25 +4,10 @@ Multiple analysis of the entanglement in the MPS circuit
 """
 
 # Import necessary modules
-import os
-import sys
-
 from qiskit import QuantumCircuit
 
 from circuits import general_qnn, ring_circ, piramidal_circuit, dummy_circ, circuit9
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
-
-class HiddenPrints:
-    """
-    Describe 
-    """
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stdout = self._original_stdout
 
 """
 TODO: This function is not really clear. What does it do? Why?
