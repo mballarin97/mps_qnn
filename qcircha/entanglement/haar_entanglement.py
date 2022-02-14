@@ -4,6 +4,8 @@ Compute the entanglement of a Haar circuit
 
 import numpy as np
 
+__all__ = ['haar_bond_entanglement', 'haar_entanglement']
+
 def _harmonic(n):
     """
     Approximation of the Harmonic series.
