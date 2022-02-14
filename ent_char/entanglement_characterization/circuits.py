@@ -154,7 +154,7 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
         Number of repetitions. It is particolarly important when 
         piramidal=False. By default 1
     piramidal : bool, optional
-        If you schould use the piramidal architecture. If False, only
+        If you should use the piramidal architecture. If False, only
         the first two layers are used, and repeated following the num_reps
         parameter, by default True
     barrier : bool, optional
@@ -234,7 +234,7 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
         for ii in range(num_qubits):
             circ.ry(params[param_idx], ii)
             param_idx += 1
-        circ.cx(0, num_qubits-1)
+        circ.cx(num_qubits-1,0)
         for ii in range(num_qubits-1, 0, -1):
             circ.cx(ii-1, ii)
         for ii in range(num_qubits):
@@ -243,7 +243,7 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
         
         circ.cx(num_qubits-1, num_qubits-2)
         circ.cx(0, num_qubits-1)
-        for ii in range(0, num_qubits-1):
+        for ii in range(0, num_qubits-2):
             circ.cx(ii+1, ii)
 
         if barrier:
