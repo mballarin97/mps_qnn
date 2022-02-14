@@ -1,13 +1,16 @@
-# MPS-QNN
+# Quantum Circuit characterization
 
 Repository with the code for the collaboration between Marco Ballarin, Riccardo Mengoni, Stefano Mangini.
 
-It is composed as follows:
+Quantum circuit characterization (`qcircha`) contains the code necessary to characterize a variational quantum circuit
+on the following aspects:
 
-- In the `qnn_analysis/` folder we report the work relative to the pretraining of QNN using MPS devices
-- In the `ent_char/` folder we report the work relative to the entanglement characterization of QNN architecture 
-    using MPS techniques.
+- the entanglement scaling
+- the KL-divergence of the probability distribution of the outputs compared to the Haar distribution
 
+Both the aspects are computed for an exact simulation with a reduced number of qubits using qiskit, and for a larger
+number of qubits using an MPS simulator. This library so enable the user to characterize a variational quantum circuit
+of almost any size compatible to the NISQ era.
 
 ## Requirement
 
