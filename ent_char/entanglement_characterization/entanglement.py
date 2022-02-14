@@ -159,8 +159,8 @@ def pick_circuit(num_qubits, num_reps, alternate = True):
     # - ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
     # - TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
 
-    feature_map = circuit9(num_qubits, num_reps=1, barrier=True)
-    var_ansatz = circuit9(num_qubits, num_reps=1, barrier=True)
+    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
+    var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
 
     # Build the PQC
     ansatz = general_qnn(num_reps, feature_map=feature_map,
@@ -176,7 +176,7 @@ def main(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_d
 
     ####################################################################
     # Entanglement in circuit and haar
-    max_rep = int(1.5*num_qubits)
+    max_rep = int(4*num_qubits)
 
     ent_list = []
     for num_reps in range(1, max_rep):
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     #backend = 'MPS'
     backend = 'Aer'
 
-    max_num_qubits = 10 #np.arange(30, 51, 10)
+    max_num_qubits = 6 #np.arange(30, 51, 10)
     entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate,
                          max_bond_dim=1024, path='./data/ent_scaling/mps/')
 

@@ -138,7 +138,7 @@ def mps_simulation(qc, random_params, max_bond_dim=1024):
 
     return ent_means, ent_std
 
-def aer_simulation(qc, random_params):
+def aer_simulation(qc, random_params, get_statevector = False):
     """
     Simulation using Qiskit Aer to study bond entanglement.
     """
@@ -157,7 +157,10 @@ def aer_simulation(qc, random_params):
     ent_means = np.mean(aer_ent, axis=0)
     ent_std = np.std(aer_ent, axis=0)
 
-    return ent_means, ent_std
+    if get_statevector == True:
+        return ent_means, ent_std, qk_results_list
+    else:
+        return ent_means, ent_std
 
 def logger(data):
     """
@@ -170,7 +173,7 @@ def logger(data):
         print(f"{k} = {v}", end="\n")
     print("===============================")
 
-def main(ansatz = None, backend = 'Aer'):
+def main(ansatz = None, backend = 'Aer', get_statevector = False):
 
     metadata = ansatz.metadata
     logger(metadata)
@@ -194,8 +197,11 @@ def main(ansatz = None, backend = 'Aer'):
     # SIMULATION WITH MPS or Aer
     if backend == 'MPS':    
         ent_means, ent_std = mps_simulation(ansatz, random_params, max_bond_dim)
-    elif backend == 'Aer':   
-        ent_means, ent_std = aer_simulation(ansatz, random_params)
+    elif backend == 'Aer':  
+        if get_statevector == True:
+            ent_means, ent_std, statevectors = aer_simulation(ansatz, random_params, get_statevector=get_statevector)
+        else: 
+            ent_means, ent_std = aer_simulation(ansatz, random_params)
     else:
         raise TypeError(f"Backend {backend} not available")
 
@@ -223,7 +229,10 @@ def main(ansatz = None, backend = 'Aer'):
 
         plt.show()
 
-    return ent_means, ent_std, ent_haar
+    if get_statevector== True:
+        return ent_means, ent_std, ent_haar, statevectors
+    else:
+        return ent_means, ent_std, ent_haar
 
 
 if __name__ == '__main__': 
@@ -248,7 +257,7 @@ if __name__ == '__main__':
     ansatz = general_qnn(num_reps, feature_map = feature_map, var_ansatz = var_ansatz, alternate = alternate, barrier = False)
 
     # Choose simulation backend
-    backend = 'MPS'
-    #backend = 'Aer'
+    #backend = 'MPS'
+    backend = 'Aer'
 
     main(ansatz, backend=backend)
