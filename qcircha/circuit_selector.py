@@ -9,7 +9,7 @@ import sys
 
 from qiskit import QuantumCircuit
 
-from circuits import general_qnn, ring_circ, piramidal_circuit
+from circuits import general_qnn, ring_circ, piramidal_circuit, dummy_circ, circuit9
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
 class HiddenPrints:
@@ -52,6 +52,8 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
         (n.15 from Kim et al.)
     - 'Piramidal' : circuit with linear entanglement and a piramidal
         structure, defined in (n.12 from Kim et al.)
+    - 'dummy' : describe
+    - 'circuit9' : circuit number 9 from Kim et al.
 
     Parameters
     ----------
@@ -101,6 +103,8 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
         (n.15 from Kim et al.)
     - 'Piramidal' : circuit with linear entanglement and a piramidal
         structure, defined in (n.12 from Kim et al.)
+    - 'dummy' : describe
+    - 'circuit9' : circuit number 9 from Kim et al.
 
     Parameters
     ----------
@@ -134,6 +138,12 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
 
         elif circ == 'piramidal':
             circ = piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False)
+        
+        elif circ == 'dummy':
+            circ = dummy_circ(num_qubits, num_reps = 1, barrier = True)
+        
+        elif circ == 'circ9':
+            circ = circuit9(num_qubits, num_reps=1, barrier=True)
         
         else:
             raise ValueError(f'Circuit {circ} is not implemented.')
