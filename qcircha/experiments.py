@@ -4,31 +4,13 @@ import time
 import json
 import os
 
-from scaling_reps import pick_circuit
+from circuit_selector import pick_circuit
 
-from run_simulations import main as ent_char
+from entanglement_characterization import entanglement_characterization
 from circuits import *
+from utils import removekey
 
-def removekey(dictionary, keys):
-    """
-    Remove the keys from a dictionary dictionary
-
-    Parameters
-    ----------
-    d : dict
-        Dictionary from where we remove the keys
-    keys : array-like
-        keys to be removed
-
-    Returns
-    -------
-    dict
-        dictionary with the removed keys
-    """
-    r = dict(dictionary)
-    for key in keys:
-        del r[key]
-    return r
+__all__ = ['entanglement_scaling', 'ent_vs_reps', 'compute_bond_entanglement']
 
 def entanglement_scaling(max_num_qubits = 10, backend = 'Aer', path = './data/ent_scaling/', 
     alternate = True, max_bond_dim=1024):
@@ -113,7 +95,7 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=1024
         Sum of the Haar entanglement along the bipartitions
     """
     
-    ent_list, _ = main(num_qubits, backend = backend, alternate = alternate, max_bond_dim = max_bond_dim)
+    ent_list, _ = compute_bond_entanglement(num_qubits, backend = backend, alternate = alternate, max_bond_dim = max_bond_dim)
 
     # Total Entanglement, sum accorss all bonds for a fixed repetition
     tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # 
@@ -126,46 +108,7 @@ def ent_vs_reps(num_qubits, backend = 'Aer', alternate = True, max_bond_dim=1024
    
     return tot_ent_per_rep, tot_ent_per_rep_std, haar_ent[0]
 
-
-def alt_comparison(num_qubits, ansatz = None, backend = 'Aer'):
-    """
-    Plot joined figure of alternated vs. non alternated architecture.
-    """
-
-    res = []
-    for alternate in [True, False]:
-        ent_list, max_ent = main(num_qubits, alternate=alternate, backend=backend, plot = False)
-        res.append(ent_list)
-    res = np.array(res)
-
-    cmap = plt.get_cmap('tab10')
-
-    fig = plt.figure(figsize=(12, 8))
-    plt.title("Circuit")
-    plt.xticks(range(num_qubits))
-    plt.ylabel("Entanglement Entropy")
-    plt.xlabel("Bond index cut")
-
-    for idx, data in enumerate(res[0]):
-        plt.errorbar(range(1, num_qubits), data[0], yerr=data[1], 
-                    ls="-", marker=".", elinewidth=0.0, c = cmap(idx),
-                    label=f"Alt, rep {idx+1}")
-
-    for idx, data in enumerate(res[1]):
-        plt.errorbar(range(1, num_qubits), data[0], yerr=data[1], 
-                    ls="--", marker=".", elinewidth = 0.0, c = cmap(idx),
-                    label=f"No Alt, rep {idx+1}")
-    
-    plt.plot(range(1, num_qubits),
-             res[0, 0, 2], ls=':', color='red', marker='X', label="Haar")
-    plt.plot(range(1, num_qubits), max_ent,
-             ls=':', marker='D', label="Maximum entanglement")
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-
-def main(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_dim = None):
+def compute_bond_entanglement(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_dim = None):
     """
     Evaluate entanglement entropy accross bonds, varying the repetitions of the variational ansatz,
     for a fixed number of qubits.
@@ -211,7 +154,7 @@ def main(num_qubits, alternate = True, backend = 'Aer', plot = False, max_bond_d
             ansatz.metadata = data
 
         # Run simulation and save result
-        tmp = ent_char(ansatz=ansatz, backend=backend)
+        tmp = entanglement_characterization(ansatz=ansatz, backend=backend)
         ent_list.append(tmp)
 
     ent_list = np.array(ent_list)

@@ -19,6 +19,8 @@ Refs:
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
+__all__ = ['general_qnn', 'piramidal_circuit', 'ring_circ', 'dummy_circ', 'circuit9']
+
 def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True):
     """
     Creates a general Quantum Neural Network with reuploading given a feature map and a variational (trainable) block.
