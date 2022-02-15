@@ -47,10 +47,14 @@ def get_reduced_density_matrix(psi, loc_dim, n_sites, sites,
 
     # COMPUTE THE REDUCED DENSITY MATRIX
     rho=np.tensordot(psi_copy, np.conjugate(psi_copy), axes=(indices, indices))
+
+    # TRANSFORM INTO A MATRIX. THE NUMBER OF ELEMENTS IS 2^{n_sites-num_traced_idxs }
+    rho_dim = int( loc_dim**( (n_sites-len(indices)) ) )
+    rho = rho.reshape(rho_dim, rho_dim)
     # PRINT RHO
     if print_rho:
         print('----------------------------------------------------')
-        print(f'DENSITY MATRIX OF SITE ({str(sites)})')
+        print(f'DENSITY MATRIX TRACING SITES ({str(indices)})')
         print('----------------------------------------------------')
         print(rho)
 
@@ -78,7 +82,7 @@ def entanglement_entropy(statevector, idx_to_trace=None):
         by tracing away the indexes selected
     """
 
-    num_sites = np.log2(len(statevector))
+    num_sites = int( np.log2(len(statevector)) )
 
     # Construct density matrix
     partial_rho = get_reduced_density_matrix(statevector, 2, num_sites, idx_to_trace)
