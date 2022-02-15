@@ -19,7 +19,8 @@ Refs:
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
-__all__ = ['general_qnn', 'piramidal_circuit', 'ring_circ', 'dummy_circ', 'circuit9']
+__all__ = ['general_qnn', 'circuit12', 'circuit15',
+           'circuit9',  'circuit1', 'identity']
 
 def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True):
     """
@@ -120,7 +121,7 @@ def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True
 
     return qc
 
-def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
+def circuit12(num_qubits, num_reps=1, piramidal=True, barrier=False):
     """
     Create the piramidal circuit generalization corresponding to the circuit 12 of the paper [1].
     
@@ -144,7 +145,7 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
         The parametric quantum circuit
     """
 
-    circ = QuantumCircuit(num_qubits, name = "piramidal_circuit")
+    circ = QuantumCircuit(num_qubits, name = "circuit12")
 
     # Compute the number of parameters
     if piramidal:
@@ -183,7 +184,7 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
 
     return circ
 
-def ring_circ(num_qubits, num_reps=1, barrier=False):
+def circuit15(num_qubits, num_reps=1, barrier=False):
     """
     Create the circuit NN with periodic conditions at the boundaries, corresponding to the circuit 15 of the paper [1].
     
@@ -202,7 +203,7 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
         The parametric quantum circuit
     """
 
-    circ = QuantumCircuit(num_qubits, name = "ring_circ")
+    circ = QuantumCircuit(num_qubits, name = "circuit15")
 
     num_params = 2*num_qubits*num_reps
     params = ParameterVector('θ', length=num_params)
@@ -233,9 +234,9 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
     return circ
 
 
-def dummy_circ(num_qubits, num_reps=1, barrier=False):
+def circuit1(num_qubits, num_reps=1, barrier=False):
     """
-    Create a dummy/easy qc.
+    Create a dummy/easy qc without entanglement, corresponding to circuit 1 in [1].
     TODO: better describe the circuit
 
     Parameters
@@ -253,7 +254,7 @@ def dummy_circ(num_qubits, num_reps=1, barrier=False):
         The parametric quantum circuit
     """
 
-    circ = QuantumCircuit(num_qubits, name="dummy_circ")
+    circ = QuantumCircuit(num_qubits, name = "circuit1")
 
     num_params = 2 * num_qubits * num_reps
     params = ParameterVector('θ', length=num_params)
@@ -261,7 +262,7 @@ def dummy_circ(num_qubits, num_reps=1, barrier=False):
     param_idx = 0
     for rep in range(num_reps):
         for ii in range(num_qubits):
-            circ.ry(params[param_idx], ii)
+            circ.rx(params[param_idx], ii)
             param_idx += 1
             circ.rz(params[param_idx], ii)
             param_idx += 1
@@ -318,4 +319,22 @@ def circuit9(num_qubits, num_reps=1, barrier=False):
     metadata = dict({"entanglement_map": "linear"})
     circ.metadata = metadata
 
+    return circ
+
+def identity(num_qubits):
+    """
+    Identity circuit, does nothing. 
+
+    Parameters
+    ----------
+    num_qubits : int
+        Total number of qubits in the system
+
+    Returns
+    -------
+    circ : :py:class:`QuantumCircuit`
+        The Identity quantum circuit
+    """
+
+    circ = QuantumCircuit(num_qubits, name="id", metadata={'entanglement_map': None})
     return circ

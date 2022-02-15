@@ -2,6 +2,7 @@
 qml_data/
 ent_char/.ipynb_checkpoints/
 ent_char/entanglement_characterization/data/
+examples/data/
 
 # docs
 docs/_build

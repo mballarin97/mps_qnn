@@ -7,7 +7,7 @@ Multiple analysis of the entanglement in the MPS circuit
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
-from qcircha.circuits import general_qnn, ring_circ, piramidal_circuit, dummy_circ, circuit9
+from qcircha.circuits import *
 
 """
 TODO: This function is not really clear. What does it do? Why?
@@ -22,7 +22,7 @@ def is_close(measured, theory):
 
 
 def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
-                 ansatz = 'TwoLocal', alternate=True):
+                 var_ansatz = 'TwoLocal', alternate=True):
     """
     Select a circuit with a feature map and a variational block. Examples below.
     Each block must have reps = 1, and then specify the correct number of repetitions
@@ -32,10 +32,10 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
 
     - 'ZZFeatureMap' : circuit with linear entanglement, used as feature map in the Power of Quantum Neural networks by Abbas et al.
     - 'TwoLocal' : circuit with linear entanglement, used as ansatz in the Power of Quantum Neural networks by Abbas et al.
-    - 'Ring' : circuit with ring entanglement, defined in   (n.15 from Kim et al.)
-    - 'Piramidal' : circuit with linear entanglement and a piramidal structure, defined in (n.12 from Kim et al.)
-    - 'dummy' : describe
-    - 'circuit9' : circuit number 9 from Kim et al.
+    - 'Circuit15' : circuit with ring entanglement, defined in   (n.15 from Kim et al.)
+    - 'Circuit12' : circuit with linear entanglement and a piramidal structure, defined in (n.12 from Kim et al.)
+    - 'Circuit1' : circuit without entanglement with two single qubits rotations per (n.1 from Kim et al.)
+    - 'Circuit9' : circuit number 9 from Kim et al.
 
     Parameters
     ----------
@@ -63,7 +63,7 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
     """
 
     feature_map = _select_circ(num_qubits, feature_map)
-    var_ansatz = _select_circ(num_qubits, ansatz)
+    var_ansatz = _select_circ(num_qubits, var_ansatz)
 
     # Build the PQC
     ansatz = general_qnn(num_reps, feature_map=feature_map,
@@ -81,12 +81,12 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
         in the Power of Quantum Neural networks by Abbas et al.
     - 'TwoLocal' : circuit with linear entanglement, used as ansatz in
         the Power of Quantum Neural networks by Abbas et al.
-    - 'Ring' : circuit with ring entanglement, defined in  
+    - 'Circuit15' : circuit with ring entanglement, defined in  
         (n.15 from Kim et al.)
-    - 'Piramidal' : circuit with linear entanglement and a piramidal
+    - 'Circuit12' : circuit with linear entanglement and a piramidal
         structure, defined in (n.12 from Kim et al.)
-    - 'dummy' : describe
-    - 'circuit9' : circuit number 9 from Kim et al.
+    - 'Circuit1' : easy circuit without entanglement (n.1 from Kim et al.) 
+    - 'circuit9' : circuit n. 9 from Kim et al.
 
     Parameters
     ----------
@@ -112,20 +112,22 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
             circ = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
 
         elif circ == 'twolocal':
-            circ = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1,
-                          insert_barriers=False, skip_final_rotation_layer=True)
+            circ = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
 
-        elif circ == 'ring':
-            circ = ring_circ(num_qubits, num_reps=1, barrier=False)
+        elif circ == 'circuit15':
+            circ = circuit15(num_qubits, num_reps=1, barrier=False)
 
-        elif circ == 'piramidal':
-            circ = piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False)
+        elif circ == 'circuit12':
+            circ = circuit12(num_qubits, num_reps=1, piramidal=True, barrier=False)
         
-        elif circ == 'dummy':
-            circ = dummy_circ(num_qubits, num_reps = 1, barrier = True)
-        
-        elif circ == 'circ9':
+        elif circ == 'circuit9':
             circ = circuit9(num_qubits, num_reps=1, barrier=True)
+
+        elif circ == 'circuit1':
+            circ = circuit1(num_qubits, num_reps = 1, barrier = True)
+        
+        elif circ == 'identity':
+            circ = identity(num_qubits)
         
         else:
             raise ValueError(f'Circuit {circ} is not implemented.')

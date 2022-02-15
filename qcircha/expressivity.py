@@ -5,6 +5,7 @@ state
 import time
 import json
 import os
+import sys
 
 import numpy as np
 import scipy as sp
@@ -21,7 +22,7 @@ from qcircha.entanglement.haar_entanglement import haar_discrete
 from qcircha.utils import removekey
 
 
-def kl_divergence(p, q):
+def kl_divergence(p, q, eps = 1e-20) :
     """
     Compute the KL divergence between two probability
     distributions
@@ -38,6 +39,11 @@ def kl_divergence(p, q):
     float
         KL divergence of p and q
     """
+
+    # Eliminate divergences (check if safe to do)
+    q = np.array([max(eps, q_j) for q_j in q])
+    p = np.array([max(eps, p_j) for p_j in p])
+
     #return np.sum(p * np.log(p/q))
     return sp.stats.entropy(p, q, base=np.e)
 
@@ -91,7 +97,7 @@ def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz
     st_list = []
     for num_reps in reps:
         ansatz = pick_circuit(num_qubits, num_reps, feature_map=feature_map,
-                              ansatz=var_ansatz, alternate=alternate)
+                              var_ansatz=var_ansatz, alternate=alternate)
         _, _, _, statevectors = entanglement_characterization(ansatz, backend=backend, get_statevector=True)
         statevectors = np.array(statevectors)
         st_list.append(statevectors)
@@ -105,14 +111,14 @@ def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz
     res = np.array(res)
 
     # Build histogram of distribution and evaluate KL divergence with Haar 
-    n_bins = 20
+    n_bins = 100
     num_qubits = ansatz.metadata['num_qubits']
     expressibility = [eval_kl(data, n_bins=n_bins, num_qubits = num_qubits)[0] for data in res]
 
     if save == True:
         # Save data
         if not os.path.isdir(path):
-            os.mkdir(path)
+            os.makedirs(path)
 
         timestamp = time.localtime()
         save_as = time.strftime("%Y-%m-%d_%H-%M-%S", timestamp) + '_' + str(np.random.randint(0, 1000))
@@ -132,6 +138,7 @@ def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz
     if plot == True:
         fig = plt.figure(figsize=(9.6, 6))
 
+        plt.ylim([1e-3, 1])
         plt.ylabel(r"$Expr. D_{KL}$")
         plt.xlabel("Repetitions")
 
