@@ -15,6 +15,7 @@ import seaborn as sns
 sns.set_theme()
 
 from qcircha.circuits import *
+from qcircha.circuit_selector import pick_circuit
 from qcircha.entanglement_characterization import entanglement_characterization
 from qcircha.entanglement.haar_entanglement import haar_discrete
 from qcircha.utils import removekey
@@ -78,7 +79,8 @@ def inner_products(state_list, rep):
     return np.array(inner_p)
 
 
-def compute_espressivity(num_qubits, repetitions, fmap=None, var_ansatz=None, backend= 'Aer', path='./data/expr/', plot = False, save = False):
+def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz=None, alternate = True,
+                         backend='Aer', path='./data/expr/', plot=False, save=False):
 
     if isinstance(repetitions, int):
         reps = range(1, repetitions)
@@ -88,7 +90,8 @@ def compute_espressivity(num_qubits, repetitions, fmap=None, var_ansatz=None, ba
     # Generate random states from QNN 
     st_list = []
     for num_reps in reps:
-        ansatz = general_qnn(num_reps, feature_map=feature_map, var_ansatz=var_ansatz, alternate=alternate, barrier=False)
+        ansatz = pick_circuit(num_qubits, num_reps, feature_map=feature_map,
+                              ansatz=var_ansatz, alternate=alternate)
         _, _, _, statevectors = entanglement_characterization(ansatz, backend=backend, get_statevector=True)
         statevectors = np.array(statevectors)
         st_list.append(statevectors)
@@ -157,5 +160,5 @@ if __name__ == '__main__':
     backend = 'Aer'
     repetitions = 15
     path = './data/expr/'
-    compute_espressivity(num_qubits, repetitions, fmap=feature_map, var_ansatz=var_ansatz, backend=backend, 
+    compute_espressivity(num_qubits, repetitions, feature_map = feature_map, var_ansatz=var_ansatz, backend=backend,
          path=path, plot = True, save = True)

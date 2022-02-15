@@ -41,7 +41,7 @@ def get_reduced_density_matrix(psi, loc_dim, n_sites, sites,
         sites = [sites]
     
     # RESHAPE psi
-    psi_copy=psi.reshape(*[loc_dim for _ in range(n_sites)])
+    psi_copy=psi.reshape(*[loc_dim for _ in range(int(n_sites))])
     # DEFINE A LIST OF SITES WE WANT TO TRACE OUT
     indices=np.array(sites)
 

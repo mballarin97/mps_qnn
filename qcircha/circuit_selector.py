@@ -22,7 +22,7 @@ def is_close(measured, theory):
 
 
 def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
-    ansatz = 'TwoLocal', alternate=True):
+                 ansatz = 'TwoLocal', alternate=True):
     """
     Select a circuit with a feature map and a variational block. Examples below.
     Each block must have reps = 1, and then specify the correct number of repetitions
