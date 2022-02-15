@@ -67,7 +67,7 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
 
     # Build the PQC
     ansatz = general_qnn(num_reps, feature_map=feature_map,
-                         var_ansatz=var_ansatz, alternate=alternate, barrier=False)
+                         var_ansatz=var_ansatz, alternate=alternate, barrier=True)
 
     return ansatz
 
@@ -112,7 +112,7 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
             circ = ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
 
         elif circ == 'twolocal':
-            circ = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=False, skip_final_rotation_layer=True)
+            circ = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, skip_final_rotation_layer=True)
 
         elif circ == 'circuit15':
             circ = circuit15(num_qubits, num_reps=1, barrier=False)
@@ -121,10 +121,13 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
             circ = circuit12(num_qubits, num_reps=1, piramidal=True, barrier=False)
         
         elif circ == 'circuit9':
-            circ = circuit9(num_qubits, num_reps=1, barrier=True)
+            circ = circuit9(num_qubits, num_reps=1, barrier = False)
+
+        elif circ == 'circuit10':
+            circ = circuit10(num_qubits, num_reps=1, barrier=False)
 
         elif circ == 'circuit1':
-            circ = circuit1(num_qubits, num_reps = 1, barrier = True)
+            circ = circuit1(num_qubits, num_reps = 1, barrier = False)
         
         elif circ == 'identity':
             circ = identity(num_qubits)

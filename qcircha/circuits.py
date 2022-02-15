@@ -20,7 +20,8 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
 __all__ = ['general_qnn', 'circuit12', 'circuit15',
-           'circuit9',  'circuit1', 'identity']
+           'circuit9',  'circuit10', 'circuit1', 
+           'identity']
 
 def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True):
     """
@@ -229,6 +230,53 @@ def circuit15(num_qubits, num_reps=1, barrier=False):
             circ.barrier()
 
     metadata = dict({"entanglement_map": "circular_ish"})
+    circ.metadata = metadata
+
+    return circ
+
+def circuit10(num_qubits, num_reps=1, barrier=False):
+    """
+    Circuit 10 from [1].
+    TODO: describe better circuit 10
+
+    Parameters
+    ----------
+    num_qubits : int
+        Total number of qubits in the system
+    num_reps : int, optional
+        Number of repetitions. By default 1
+    barrier : bool, optional
+        If True, insert a barrier after each repetition. Default to False.
+
+    Returns
+    -------
+    circ : :py:class:`QuantumCircuit`
+        The parametric quantum circuit
+    """
+
+    circ = QuantumCircuit(num_qubits, name="circuit10")
+
+    num_params = 2 * num_qubits * num_reps
+    params = ParameterVector('θ', length=num_params)
+
+    param_idx = 0
+    for rep in range(num_reps):
+        for ii in range(num_qubits):
+            circ.ry(params[param_idx], ii)
+            param_idx += 1
+
+        for ii in range(num_qubits-1):
+            circ.cx(ii, ii+1)
+        circ.cx(0, num_qubits-1)
+
+        for ii in range(num_qubits):
+            circ.rx(params[param_idx], ii)
+            param_idx += 1
+
+        if barrier:
+            circ.barrier()
+
+    metadata = dict({"entanglement_map": "ring"})
     circ.metadata = metadata
 
     return circ
