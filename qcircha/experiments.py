@@ -49,7 +49,7 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
 
     ent_data = []
     for nqubits in qubits_range:
-        tmp = ent_vs_reps(nqubits, feature_map=feature_map, ansatz=var_ansatz,
+        tmp = ent_vs_reps(nqubits, feature_map=feature_map, var_ansatz=var_ansatz,
             backend=backend, alternate=alternate, max_bond_dim=max_bond_dim)
         ent_data.append(tmp)
 
@@ -111,7 +111,7 @@ def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', b
     """
     
     ent_list, _ = compute_bond_entanglement(num_qubits, feature_map=feature_map,
-        ansatz=var_ansatz, backend = backend, alternate = alternate, max_bond_dim = max_bond_dim)
+        var_ansatz=var_ansatz, backend = backend, alternate = alternate, max_bond_dim = max_bond_dim)
 
     # Total Entanglement, sum accorss all bonds for a fixed repetition
     tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # 

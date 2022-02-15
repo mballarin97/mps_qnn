@@ -78,7 +78,7 @@ def entanglement_entropy(statevector, idx_to_trace=None):
         by tracing away the indexes selected
     """
 
-    num_sites = np.log2(len(statevector))
+    num_sites = int( np.log2(len(statevector)) )
 
     # Construct density matrix
     partial_rho = get_reduced_density_matrix(statevector, 2, num_sites, idx_to_trace)
