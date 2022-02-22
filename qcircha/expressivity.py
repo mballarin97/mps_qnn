@@ -86,7 +86,7 @@ def inner_products(state_list, rep):
 
 
 def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz=None, alternate = True,
-                         backend='Aer', path='./data/expr/', plot=False, save=False):
+                         backend='Aer', path='./data/expr/', plot=False, save=False, max_bond_dim=None):
 
     if isinstance(repetitions, int):
         reps = range(1, repetitions)
@@ -98,7 +98,8 @@ def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz
     for num_reps in reps:
         ansatz = pick_circuit(num_qubits, num_reps, feature_map=feature_map,
                               var_ansatz=var_ansatz, alternate=alternate)
-        _, _, _, statevectors = entanglement_characterization(ansatz, backend=backend, get_statevector=True)
+        _, _, _, statevectors = entanglement_characterization(ansatz, backend=backend, get_statevector=True, 
+            max_bond_dim = max_bond_dim)
         statevectors = np.array(statevectors)
         st_list.append(statevectors)
         print("")
