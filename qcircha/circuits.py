@@ -270,7 +270,7 @@ def circuit10(num_qubits, num_reps=1, barrier=False):
         circ.cx(0, num_qubits-1)
 
         for ii in range(num_qubits):
-            circ.rx(params[param_idx], ii)
+            circ.ry(params[param_idx], ii)
             param_idx += 1
 
         if barrier:

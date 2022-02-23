@@ -209,7 +209,7 @@ def entanglement_characterization(ansatz = None, backend = 'Aer', get_statevecto
         ent_means, ent_std, statevectors = _mps_simulation(ansatz, random_params, max_bond_dim, do_statevector=get_statevector)
 
     elif backend == 'Aer':  
-            ent_means, ent_std, statevectors = _aer_simulation(ansatz, random_params, get_statevector=get_statevector)
+        ent_means, ent_std, statevectors = _aer_simulation(ansatz, random_params, get_statevector=get_statevector)
 
     else:
         raise TypeError(f"Backend {backend} not available")

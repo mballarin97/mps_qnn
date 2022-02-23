@@ -125,7 +125,7 @@ def haar_bond_entanglement(num_qubits):
     else:
         entanglement_bonds = [approx_haar_entanglement(num_qubits, i) for i in range(1, num_qubits)]
     
-    return entanglement_bonds
+    return np.array(entanglement_bonds)
 
 def haar_discrete(xmin, delta, n):
     """

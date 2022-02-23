@@ -110,8 +110,9 @@ def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', b
         Sum of the Haar entanglement along the bipartitions
     """
     
-    ent_list, _ = compute_bond_entanglement(num_qubits, feature_map=feature_map,
-        var_ansatz=var_ansatz, backend = backend, alternate = alternate, max_bond_dim = max_bond_dim)
+    ent_list, _ = compute_bond_entanglement(num_qubits, feature_map=feature_map, var_ansatz=var_ansatz, 
+                                            backend = backend, alternate = alternate, 
+                                            max_bond_dim = max_bond_dim)
 
     # Total Entanglement, sum accorss all bonds for a fixed repetition
     tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # 
@@ -163,7 +164,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
     ####################################################################
     # Entanglement in circuit and haar
-    max_rep = int(4*num_qubits)
+    max_rep = int(1*num_qubits)
 
     ent_list = []
     for num_reps in range(1, max_rep):
@@ -171,7 +172,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
         # Pick a PQC (modify the function)
         ansatz = pick_circuit(num_qubits, num_reps, feature_map=feature_map,
-            ansatz=var_ansatz, alternate = alternate)
+                              var_ansatz=var_ansatz, alternate = alternate)
         
         # If MPS, add max_bond_dim to circuit's metadata
         if backend == "MPS":
@@ -181,7 +182,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
         # Run simulation and save result
         tmp = entanglement_characterization(ansatz=ansatz, backend=backend)
-        ent_list.append(tmp)
+        ent_list.append(tmp[:-1])
 
     ent_list = np.array(ent_list)
     

@@ -3,6 +3,7 @@ Compute the entanglement of a statevector
 """
 
 import numpy as np
+from scipy.stats import entropy
 
 __all__ = ['get_reduced_density_matrix', 'entanglement_entropy', 'von_neumann_entropy',
     'entanglement_bond']
@@ -125,7 +126,7 @@ def entanglement_bond(statevector):
 
     return np.array(res)
 
-def von_neumann_entropy(eigvs):
+def von_neumann_entropy(eigvs, base = np.e):
     """
     Compute the Von Neumann entanglement entropy of a density matrix
     with eigenvalues :math:`\\lambda_i`
@@ -144,7 +145,10 @@ def von_neumann_entropy(eigvs):
         entanglement entropy
     """
 
-    eigvs = np.array(eigvs)
-    entanglement = -np.sum( eigvs*np.log(eigvs) )
+    eigvs = np.array([max(0., eig) for eig in eigvs])
+    if min(eigvs) < 0:
+        print("Negative eigenvalue!", eigvs)
+    entanglement = entropy(eigvs, base = base) #-np.sum( eigvs*np.log(eigvs) )
+
 
     return entanglement
