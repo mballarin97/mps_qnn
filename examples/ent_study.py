@@ -13,9 +13,11 @@ def main():
     #backend = 'MPS'
     backend = 'Aer'
 
-    max_num_qubits = [6] #np.arange(30, 51, 10)
-    entanglement_scaling(max_num_qubits, backend = backend, alternate = alternate,
-                            max_bond_dim=1024, path='./data/ent_scaling/mps/')
+    max_num_qubits = 12 #np.arange(30, 51, 10)
+    entanglement_scaling(max_num_qubits, 
+                        feature_map = 'Circuit9', var_ansatz = "TwoLocal", 
+                        alternate = alternate, backend = backend,
+                        max_bond_dim = 1024, path='./data/ent_scaling/')
 
     #main(num_qubits, backend=backend, alternate=alternate)
     #ent_vs_reps(num_qubits, alternate = alternate, backend=backend)
