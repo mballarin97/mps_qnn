@@ -10,10 +10,10 @@ def main():
     alternate = True
 
     # Choose simulation backend
-    #backend = 'MPS'
-    backend = 'Aer'
+    backend = 'MPS'
+    #backend = 'Aer'
 
-    max_num_qubits = 12 #np.arange(30, 51, 10)
+    max_num_qubits = 4 #np.arange(30, 51, 10)
     entanglement_scaling(max_num_qubits, 
                         feature_map = 'Circuit9', var_ansatz = "TwoLocal", 
                         alternate = alternate, backend = backend,
