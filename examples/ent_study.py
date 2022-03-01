@@ -1,27 +1,28 @@
 import numpy as np
-from qcircha import entanglement_scaling
+from qcircha import entanglement_scaling, compute_bond_entanglement
 
 def main():
-    seed = 42
-    np.random.seed(seed)
+    #seed = 34
+    #np.random.seed(seed)
 
     # Quantum Cirucit structure
-    #num_qubits = 8
+    num_qubits = 5
     alternate = True
 
     # Choose simulation backend
-    backend = 'MPS'
-    #backend = 'Aer'
+    #backend = 'MPS'
+    backend = 'Aer'
 
-    max_num_qubits = 4 #np.arange(30, 51, 10)
+    max_num_qubits = 12 #np.arange(30, 51, 10)
     entanglement_scaling(max_num_qubits, 
-                        feature_map = 'Circuit9', var_ansatz = "TwoLocal", 
-                        alternate = alternate, backend = backend,
-                        max_bond_dim = 1024, path='./data/ent_scaling/')
+                         feature_map='TwoLocal_h_parmetric2q_full', var_ansatz="TwoLocal_full",
+                         alternate = alternate, backend = backend,
+                         max_bond_dim = 1024, path='./data/ent_scaling/')
 
-    #main(num_qubits, backend=backend, alternate=alternate)
-    #ent_vs_reps(num_qubits, alternate = alternate, backend=backend)
-    #alt_comparison(num_qubits, backend=backend)
+    #compute_bond_entanglement(6, 
+    #                          feature_map='circuit1', var_ansatz='TwoLocal', 
+    #                          alternate=True, backend = backend, 
+    #                          plot=True, max_bond_dim=None)
 
 if __name__ == '__main__':
     main()
