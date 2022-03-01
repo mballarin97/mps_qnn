@@ -16,6 +16,8 @@ from qcircha.entanglement.haar_entanglement import haar_bond_entanglement
 from qcircha.entanglement.statevector_entanglement import entanglement_bond
 from qcircha.utils import logger
 
+import matplotlib.pyplot as plt
+
 __all__ = ['entanglement_characterization']
 
 def _run_mps(qc, max_bond_dim=1024, do_statevector=False):
@@ -140,9 +142,9 @@ def _aer_simulation(qc, random_params, get_statevector = False):
 
     qk_results_list = []
     sim_bknd = Aer.get_backend('statevector_simulator')
+    qc_t = transpile(qc, backend=sim_bknd)
     for idx, params in enumerate(random_params):
         print(f"Run {idx}/{len(random_params)}", end="\r")
-        qc_t = qc.decompose()
         qk_results = sim_bknd.run(qc_t.assign_parameters(params))
         qk_results_list.append(np.asarray(qk_results.result().get_statevector()))
     

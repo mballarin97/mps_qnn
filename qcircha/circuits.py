@@ -384,5 +384,5 @@ def identity(num_qubits):
         The Identity quantum circuit
     """
 
-    circ = QuantumCircuit(num_qubits, name="id", metadata={'entanglement_map': None})
+    circ = QuantumCircuit(num_qubits, name="identity", metadata={'entanglement_map': 'None'})
     return circ

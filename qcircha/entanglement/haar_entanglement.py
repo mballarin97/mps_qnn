@@ -48,7 +48,7 @@ def approx_haar_entanglement(num_qubits, num_A):
         Approximate haar entanglement of the bipartition
     """
     num_A = min([num_A, num_qubits - num_A])
-    d = (2**num_A - 1) / (2**(num_qubits - num_A + 1))
+    d = (2.**num_A - 1.) / (2.**(num_qubits - num_A + 1.))
     ent = _harmonic(2**num_qubits) - _harmonic(2**(num_qubits - num_A)) - d
     return ent
 

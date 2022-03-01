@@ -5,6 +5,36 @@ General utility functions
 import sys
 import os
 
+import os
+import sys
+import json
+
+def list_data(path=None):
+    idx_list = []
+    for file in os.listdir(path):
+        if file.endswith(".json"):
+            idx = file[:-5]  # delete ".json"
+            idx_list.append(idx)
+
+    return idx_list
+
+def gather_data(key = None, value = None, path = None):
+    """
+    Find training runs with a specific param_perturbation.
+    """
+
+    idx_list = []
+    for file in os.listdir(path):
+        if file.endswith(".json"):
+            with open(os.path.join(path, file)) as datafile:
+                model_data = json.load(datafile)
+                        
+            if all([model_data[k] == v for k, v in zip(key, value)]):
+                idx = file[:-5]  # delete ".json"
+                idx_list.append(idx)
+
+    return idx_list
+
 def logger(data):
     """
     Printing data.

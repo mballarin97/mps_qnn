@@ -44,7 +44,7 @@ def get_reduced_density_matrix(psi, loc_dim, n_sites, sites,
     # RESHAPE psi
     psi_copy=psi.reshape(*[loc_dim for _ in range(int(n_sites))])
     # DEFINE A LIST OF SITES WE WANT TO TRACE OUT
-    indices=np.array(sites)
+    indices = -(np.array(sites) - n_sites + 1)
 
     # COMPUTE THE REDUCED DENSITY MATRIX
     rho=np.tensordot(psi_copy, np.conjugate(psi_copy), axes=(indices, indices))
@@ -144,10 +144,12 @@ def von_neumann_entropy(eigvs, base = np.e):
     float
         entanglement entropy
     """
-
+    
+    # Clean from negative negligible eigenvalues (zero up to machine precision)
+    if min(eigvs) <= -1e-15:
+        raise ValueError(f"Negative eigenvalue in reduced density matrix encountered = {min(eigvs)}")
     eigvs = np.array([max(0., eig) for eig in eigvs])
-    if min(eigvs) < 0:
-        print("Negative eigenvalue!", eigvs)
+    
     entanglement = entropy(eigvs, base = base) #-np.sum( eigvs*np.log(eigvs) )
 
 

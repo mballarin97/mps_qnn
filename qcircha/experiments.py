@@ -54,7 +54,7 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
         ent_data.append(tmp)
 
     # Save data
-    path = './data/ent_scaling/'
+    # path = './data/ent_scaling/'
     if not os.path.isdir(path):
         os.mkdir(path) 
 
@@ -63,10 +63,16 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
     name = os.path.join(path, save_as)
 
     # Save details of the ansatz
-    ansatz = pick_circuit(2, 2, alternate=alternate)
+    ansatz = pick_circuit(2, 2, feature_map = feature_map, var_ansatz = var_ansatz, alternate=alternate)
     meta = dict({"max_num_qubits": max_num_qubits, "backend": backend})
     circ_data = removekey(ansatz.metadata, ["num_qubits", "num_reps", "params"])
     meta.update(circ_data)  # add metadata from the ansatz
+
+    # Eliminate dash in circuit names, if any
+    fmap = meta['fmap'].split('-')[0]
+    var_ansatz = meta['var_ansatz'].split('-')[0]
+    meta['fmap'] = fmap
+    meta['var_ansatz'] = var_ansatz
     
     with open(name+'.json', 'w') as file:
         json.dump(meta, file, indent=4)
@@ -164,7 +170,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
     ####################################################################
     # Entanglement in circuit and haar
-    max_rep = int(1*num_qubits)
+    max_rep = int(1.5*num_qubits)
 
     ent_list = []
     for num_reps in range(1, max_rep):
@@ -193,19 +199,18 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
     ####################################################################
     # Plot
     if plot:
+        print(ent_list)
         fig = plt.figure(figsize=(8, 5))
-        plt.title(f"{ansatz[1]}, alternated = {alternate}")
+        plt.title(f"{var_ansatz[1]}, alternated = {alternate}")
         plt.xticks(range(num_qubits))
         plt.ylabel("Entanglement Entropy")
         plt.xlabel("Bond index cut")
+
         for idx, data in enumerate(ent_list):
-            plt.errorbar(range(1, num_qubits),
-                         data[0], yerr=data[1], label=f"Rep {idx+1}")
+            plt.errorbar(range(1, num_qubits), data[0], yerr=0*data[1], label=f"Rep {idx+1}", marker = 'o')
         
-        plt.plot(range(1, num_qubits),
-                 ent_list[0, 2], ls='--', color='red', marker='x', label="Haar")
-        plt.plot(range(1, num_qubits), max_ent,
-                 ls='--', marker='.', label="Maximum entanglement")
+        plt.plot(range(1, num_qubits), ent_list[0, 2], ls='-.', color='red', marker='v', label="Haar")
+        plt.plot(range(1, num_qubits), max_ent, ls='--', marker='.', label="Maximum entanglement")
         plt.legend()
         plt.tight_layout()
 
