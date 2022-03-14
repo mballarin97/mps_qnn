@@ -18,12 +18,34 @@ Refs:
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
-from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
+__all__ = ['general_qnn', 'circuit12', 'circuit15',
+           'circuit9',  'circuit10', 'circuit1', 
+           'identity']
 
-def general_qnn(num_reps, alternate=False, feature_map=None, var_ansatz=None, barrier=True):
+def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True):
     """
-    Creates a general Quantum Neural Network with reuploading given a feature map and a variational (trainable) block.  
+    Creates a general Quantum Neural Network with reuploading given a feature map and a variational (trainable) block.
+
+    Parameters
+    ----------
+    num_reps : int
+        Number of repetitions of the blocks
+    feature_map : :py:class:`QuantumCircuit`
+        Feature map of the parametrized circuit
+    var_ansatz : :py:class:`QuantumCircuit`
+        Variational ansatz of the parametrized circuit
+    alternate : bool, optional
+        If the feature map and the variational ansatz should be alternated in the
+        disposition (True) or if first apply ALL the feature map repetitions and
+        then all the ansatz repetitions (False). Default to True.
+    barrier : bool, optional
+        If True, apply barriers after each block, by default True
+
+    Returns
+    -------
+    :py:class:`QuantumCircuit`
+        Parametrized quantum circuit forming the quantum neural network
     """
 
     if feature_map.num_qubits != var_ansatz.num_qubits:
@@ -100,49 +122,7 @@ def general_qnn(num_reps, alternate=False, feature_map=None, var_ansatz=None, ba
 
     return qc
 
-
-def Abbas_QNN(num_qubits, reps=2, alternate=True, barrier=False):
-    """
-    Creates the QNN from Abbas, given by repetition of ZZfeaturemap and TwoLocal vartiaional ansatz.
-    """
-
-    param_names = ['θ'+str(i) for i in range(0, reps)]
-    feature_map = ZZFeatureMap(num_qubits, reps=1, entanglement='linear', insert_barriers=barrier)
-
-    qc = QuantumCircuit(num_qubits, name = "AbbassQNN")
-
-    if alternate:
-        for i in range(reps):
-            qc = qc.compose(feature_map)
-
-            # Skip final rotation to ensure the alternate = T/F have same number of params
-            var_ansatz = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1,
-                                  skip_final_rotation_layer=True, insert_barriers=barrier, parameter_prefix=param_names[i])
-
-            if barrier:
-                qc.barrier()
-
-            qc = qc.compose(var_ansatz)
-            
-            if barrier:
-                qc.barrier()
-
-    elif alternate == False:
-        qc = qc.compose(ZZFeatureMap(num_qubits, reps=reps,
-                        entanglement='linear', insert_barriers=barrier))
-        
-        if barrier:
-            qc.barrier()
-        
-        # Skip final rotation to ensure the alternate = T/F have same number of params
-        qc = qc.compose(TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=reps, 
-                                skip_final_rotation_layer=True, insert_barriers=barrier))
-    else:
-        raise TypeError(f"Structure {alternate} not implemented. ")
-
-    return qc
-
-def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
+def circuit12(num_qubits, num_reps=1, piramidal=True, barrier=False):
     """
     Create the piramidal circuit generalization corresponding to the circuit 12 of the paper [1].
     
@@ -162,11 +142,11 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
 
     Returns
     -------
-    circ : QuantumCircuit
+    circ : :py:class:`QuantumCircuit`
         The parametric quantum circuit
     """
 
-    circ = QuantumCircuit(num_qubits, name = "piramidal_circuit")
+    circ = QuantumCircuit(num_qubits, name = "circuit12")
 
     # Compute the number of parameters
     if piramidal:
@@ -205,7 +185,7 @@ def piramidal_circuit(num_qubits, num_reps=1, piramidal=True, barrier=False):
 
     return circ
 
-def ring_circ(num_qubits, num_reps=1, barrier=False):
+def circuit15(num_qubits, num_reps=1, barrier=False):
     """
     Create the circuit NN with periodic conditions at the boundaries, corresponding to the circuit 15 of the paper [1].
     
@@ -220,11 +200,11 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
 
     Returns
     -------
-    circ : QuantumCircuit
+    circ : :py:class:`QuantumCircuit`
         The parametric quantum circuit
     """
 
-    circ = QuantumCircuit(num_qubits, name = "ring_circ")
+    circ = QuantumCircuit(num_qubits, name = "circuit15")
 
     num_params = 2*num_qubits*num_reps
     params = ParameterVector('θ', length=num_params)
@@ -254,13 +234,75 @@ def ring_circ(num_qubits, num_reps=1, barrier=False):
 
     return circ
 
-
-def dummy_circ(num_qubits, num_reps=1, barrier=False):
+def circuit10(num_qubits, num_reps=1, barrier=False):
     """
-    Create a dummy/easy qc.
+    Circuit 10 from [1].
+    TODO: describe better circuit 10
+
+    Parameters
+    ----------
+    num_qubits : int
+        Total number of qubits in the system
+    num_reps : int, optional
+        Number of repetitions. By default 1
+    barrier : bool, optional
+        If True, insert a barrier after each repetition. Default to False.
+
+    Returns
+    -------
+    circ : :py:class:`QuantumCircuit`
+        The parametric quantum circuit
     """
 
-    circ = QuantumCircuit(num_qubits, name="dummy_circ")
+    circ = QuantumCircuit(num_qubits, name="circuit10")
+
+    num_params = 2 * num_qubits * num_reps
+    params = ParameterVector('θ', length=num_params)
+
+    param_idx = 0
+    for rep in range(num_reps):
+        for ii in range(num_qubits):
+            circ.ry(params[param_idx], ii)
+            param_idx += 1
+
+        for ii in range(num_qubits-1):
+            circ.cx(ii, ii+1)
+        circ.cx(0, num_qubits-1)
+
+        for ii in range(num_qubits):
+            circ.ry(params[param_idx], ii)
+            param_idx += 1
+
+        if barrier:
+            circ.barrier()
+
+    metadata = dict({"entanglement_map": "ring"})
+    circ.metadata = metadata
+
+    return circ
+
+
+def circuit1(num_qubits, num_reps=1, barrier=False):
+    """
+    Create a dummy/easy qc without entanglement, corresponding to circuit 1 in [1].
+    TODO: better describe the circuit
+
+    Parameters
+    ----------
+    num_qubits : int
+        Total number of qubits in the system
+    num_reps : int, optional
+        Number of repetitions. By default 1
+    barrier : bool, optional
+        If True, insert a barrier after each repetition. Default to False.
+
+    Returns
+    -------
+    circ : :py:class:`QuantumCircuit`
+        The parametric quantum circuit
+    """
+
+    circ = QuantumCircuit(num_qubits, name = "circuit1")
 
     num_params = 2 * num_qubits * num_reps
     params = ParameterVector('θ', length=num_params)
@@ -268,7 +310,7 @@ def dummy_circ(num_qubits, num_reps=1, barrier=False):
     param_idx = 0
     for rep in range(num_reps):
         for ii in range(num_qubits):
-            circ.ry(params[param_idx], ii)
+            circ.rx(params[param_idx], ii)
             param_idx += 1
             circ.rz(params[param_idx], ii)
             param_idx += 1
@@ -285,6 +327,21 @@ def dummy_circ(num_qubits, num_reps=1, barrier=False):
 def circuit9(num_qubits, num_reps=1, barrier=False):
     """
     Circuit 9 from [1].
+    TODO: describe better circuit 9
+
+    Parameters
+    ----------
+    num_qubits : int
+        Total number of qubits in the system
+    num_reps : int, optional
+        Number of repetitions. By default 1
+    barrier : bool, optional
+        If True, insert a barrier after each repetition. Default to False.
+
+    Returns
+    -------
+    circ : :py:class:`QuantumCircuit`
+        The parametric quantum circuit
     """
 
     circ = QuantumCircuit(num_qubits, name="circuit9")
@@ -310,4 +367,22 @@ def circuit9(num_qubits, num_reps=1, barrier=False):
     metadata = dict({"entanglement_map": "linear"})
     circ.metadata = metadata
 
+    return circ
+
+def identity(num_qubits):
+    """
+    Identity circuit, does nothing. 
+
+    Parameters
+    ----------
+    num_qubits : int
+        Total number of qubits in the system
+
+    Returns
+    -------
+    circ : :py:class:`QuantumCircuit`
+        The Identity quantum circuit
+    """
+
+    circ = QuantumCircuit(num_qubits, name="identity", metadata={'entanglement_map': 'None'})
     return circ
