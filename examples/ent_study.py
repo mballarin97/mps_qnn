@@ -1,28 +1,33 @@
 import numpy as np
 from qcircha import entanglement_scaling, compute_bond_entanglement
+from qiskit.circuit.library import TwoLocal
 
 def main():
-    #seed = 34
-    #np.random.seed(seed)
 
-    # Quantum Cirucit structure
-    num_qubits = 5
+    # SELECT STRUCTURE
     alternate = True
 
-    # Choose simulation backend
-    #backend = 'MPS'
+    # SIMULATION BACKEND
     backend = 'Aer'
+    # backend = 'MPS'
 
-    max_num_qubits = 12 #np.arange(30, 51, 10)
+    # TOTAL ENTANGLEMENT SCALING    
+    max_num_qubits = 12 # or np.arange(30, 51, 10)
     entanglement_scaling(max_num_qubits, 
-                         feature_map='TwoLocal_h_parmetric2q_full', var_ansatz="TwoLocal_full",
+                         feature_map='TwoLocal', var_ansatz="TwoLocal",
                          alternate = alternate, backend = backend,
                          max_bond_dim = 1024, path='./data/ent_scaling/')
 
-    #compute_bond_entanglement(6, 
-    #                          feature_map='circuit1', var_ansatz='TwoLocal', 
+
+    # ENTANGLEMENT ACROSS BIPARTITIONS
+    # num_qubits = 5
+    # compute_bond_entanglement(num_qubits, 
+    #                          feature_map='ZZFeatureMap', var_ansatz='TwoLocal', 
     #                          alternate=True, backend = backend, 
     #                          plot=True, max_bond_dim=None)
 
 if __name__ == '__main__':
+
+    #seed = 34
+    #np.random.seed(seed)
     main()

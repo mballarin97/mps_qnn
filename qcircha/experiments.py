@@ -200,7 +200,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
     # Plot
     if plot:
         print(ent_list)
-        fig = plt.figure(figsize=(8, 5))
+        fig = plt.figure(figsize=(9.6, 6))
         plt.title(f"{var_ansatz[1]}, alternated = {alternate}")
         plt.xticks(range(num_qubits))
         plt.ylabel("Entanglement Entropy")
