@@ -28,6 +28,15 @@ def gather_data(key = None, value = None, path = None):
         if file.endswith(".json"):
             with open(os.path.join(path, file)) as datafile:
                 model_data = json.load(datafile)
+
+            # Removing trash numbers at the end of some circuit names
+            if len(model_data['fmap'].split('-')) > 1:
+                #print("Changing name! [can ignore]")
+                model_data['fmap'] = model_data['fmap'].split('-')[0]
+
+            if len(model_data['var_ansatz'].split('-')) > 1:
+                #print("Changing name! [can ignore]")
+                model_data['var_ansatz'] = model_data['var_ansatz'].split('-')[0]
                         
             if all([model_data[k] == v for k, v in zip(key, value)]):
                 idx = file[:-5]  # delete ".json"

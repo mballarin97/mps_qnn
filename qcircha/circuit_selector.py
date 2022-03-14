@@ -32,10 +32,11 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
 
     - 'ZZFeatureMap' : circuit with linear entanglement, used as feature map in the Power of Quantum Neural networks by Abbas et al.
     - 'TwoLocal' : circuit with linear entanglement, used as ansatz in the Power of Quantum Neural networks by Abbas et al.
-    - 'Circuit15' : circuit with ring entanglement, defined in   (n.15 from Kim et al.)
+    - 'Circuit15' : circuit with ring entanglement, defined in (n.15 from Kim et al.)
     - 'Circuit12' : circuit with linear entanglement and a piramidal structure, defined in (n.12 from Kim et al.)
-    - 'Circuit1' : circuit without entanglement with two single qubits rotations per (n.1 from Kim et al.)
-    - 'Circuit9' : circuit number 9 from Kim et al.
+    - 'Circuit1' : circuit without entanglement with two single qubits rotations per qubit (n.1 from Kim et al.)
+    - 'Circuit9' : circuit n. 9 from Kim et al.
+    - variations of TwoLocal structures are present. 
 
     Parameters
     ----------
@@ -114,6 +115,12 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
         elif circ == 'twolocal':
             circ = TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, skip_final_rotation_layer=True)
 
+        elif circ == 'twolocalx':
+            circ = TwoLocal(num_qubits, 'rx', 'cx', 'linear', reps=1, skip_final_rotation_layer=True, name = "TwoLocalX")
+
+        elif circ == 'twolocalz':
+            circ = TwoLocal(num_qubits, 'rz', 'cx', 'linear', reps=1, skip_final_rotation_layer=True, name="TwoLocalZ")
+
         elif circ == 'zzfeaturemap_ring':
             circ = ZZFeatureMap(num_qubits, reps=1, entanglement='circular')
 
@@ -135,22 +142,22 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
         elif circ == 'twolocal_plus_full':
             circ = TwoLocal(num_qubits, ['rz', 'ry'], 'cx', 'full', reps=1, skip_final_rotation_layer=True, name='TwoLocal_plus')
 
-        elif circ == 'twolocal_parmetric2q':
+        elif circ == 'twolocal_parametric2q':
             circ = TwoLocal(num_qubits, 'ry', 'crz', 'linear', reps=1, skip_final_rotation_layer=True, name='TwoLocal_parametricRz')
 
-        elif circ == 'twolocal_parmetric2q_ring':
+        elif circ == 'twolocal_parametric2q_ring':
             circ = TwoLocal(num_qubits, 'ry', 'crz', 'circular', reps=1, skip_final_rotation_layer=True, name='TwoLocal_parametricRz')
 
-        elif circ == 'twolocal_parmetric2q_full':
+        elif circ == 'twolocal_parametric2q_full':
             circ = TwoLocal(num_qubits, 'ry', 'crz', 'full', reps=1, skip_final_rotation_layer=True, name='TwoLocal_parametricRz')
 
-        elif circ == 'twolocal_h_parmetric2q':
+        elif circ == 'twolocal_h_parametric2q':
             circ = TwoLocal(num_qubits, 'h', 'crx', 'linear', reps=1, skip_final_rotation_layer=True, name='TwoLocal_h_parametricRz')
 
-        elif circ == 'twolocal_h_parmetric2q_ring':
+        elif circ == 'twolocal_h_parametric2q_ring':
             circ = TwoLocal(num_qubits, 'h', 'crx', 'circular', reps=1, skip_final_rotation_layer=True, name='TwoLocal_h_parametricRz')
 
-        elif circ == 'twolocal_h_parmetric2q_full':
+        elif circ == 'twolocal_h_parametric2q_full':
             circ = TwoLocal(num_qubits, 'h', 'crx', 'full', reps=1, skip_final_rotation_layer=True, name='TwoLocal_h_parametricRz')
 
         elif circ == 'circuit15':

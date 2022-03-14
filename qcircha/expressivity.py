@@ -89,7 +89,7 @@ def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz
                          backend='Aer', path='./data/expr/', plot=False, save=False, max_bond_dim=None):
 
     if isinstance(repetitions, int):
-        reps = range(1, repetitions)
+        reps = range(1, repetitions + 1)
     else:
         reps = repetitions
     
@@ -154,19 +154,16 @@ def compute_espressivity(num_qubits, repetitions, feature_map = None, var_ansatz
 if __name__ == '__main__':
     
     # Fixing seed for reproducibility
-    seed = 120
-    np.random.seed(seed)
+    # seed = 120
+    # np.random.seed(seed)
 
     num_qubits = 6
     feature_map = 'ZZFeatureMap'
     var_ansatz = 'TwoLocal'
-    # ZZFeatureMap(num_qubits, reps=1, entanglement='linear')
-    # TwoLocal(num_qubits, 'ry', 'cx', 'linear', reps=1, insert_barriers=True, skip_final_rotation_layer=True)
-    # qk.QuantumCircuit(num_qubits, name="Id", metadata={'entanglement_map': None}) # Identiy
 
     alternate = True
     backend = 'Aer'
-    repetitions = 15
+    repetitions = num_qubits
     path = './data/expr/'
     compute_espressivity(num_qubits, repetitions, feature_map = feature_map, var_ansatz=var_ansatz, backend=backend,
          path=path, plot = True, save = True)

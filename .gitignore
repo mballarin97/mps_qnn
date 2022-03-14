@@ -3,6 +3,9 @@ qml_data/
 ent_char/.ipynb_checkpoints/
 ent_char/entanglement_characterization/data/
 examples/data/
+examples/Ent_visualize_OLD.ipynb
+examples/Ent_visualize_Local.ipynb
+examples/Expr_visualize_Local.ipynb
 
 # docs
 docs/_build
