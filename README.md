@@ -1,3 +1,4 @@
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 # Quantum Circuit characterization
 
 Repository with the code for the collaboration between Marco Ballarin, Riccardo Mengoni, Stefano Mangini.
@@ -62,4 +63,10 @@ The latter two packages are available from Marco Ballarin upon reasonable reques
 
 ## License
 
-Decide a license
+The project `qcircha` from the repository https://github.com/mballarin97/mps_qnn
+is licensed under the following license:
+
+[Apache License 2.0](LICENSE)
+
+The license applies to the files of this project as indicated
+in the header of each file, but not its dependencies.
