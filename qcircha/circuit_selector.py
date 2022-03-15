@@ -9,8 +9,7 @@
 # that they have been altered from the originals.
 
 """
-Multiple analysis of the entanglement in the MPS circuit
-(alternate vs. non alternate, varying number of reps, entanglement saturation to haar states) and plots.
+Functions to create and manage QNNs, in addition to some pre-defined structures.  
 """
 
 # Import necessary modules
@@ -18,17 +17,6 @@ from qiskit import QuantumCircuit
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
 from qcircha.circuits import *
-
-"""
-TODO: This function is not really clear. What does it do? Why?
-
-def is_close(measured, theory):
-    dist = np.linalg.norm(theory-measured)
-    dist1 = np.mean(np.abs(ent_haar-ent_meas)) 
-    # Sum of entanglement
-    dist2 = np.sum(theory) - np.sum(measured)
-    return dist2, dist1
-"""
 
 
 def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',

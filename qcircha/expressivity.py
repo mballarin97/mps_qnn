@@ -9,8 +9,11 @@
 # that they have been altered from the originals.
 
 """
-Compute the expressivity of a parametrized quantum circuit by computing the KL-divergence from haar
-state
+Compute the expressibility of a parametrized quantum circuit by computing the KL-divergence
+from the Haar distribution, see:
+'Expressibility and entangling capability of parameterized quantum circuits for hybrid quantum-classical algorithms',
+Sim et al. (2019).
+"
 """
 import time
 import json

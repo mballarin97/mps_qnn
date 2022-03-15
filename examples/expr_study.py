@@ -7,10 +7,9 @@ def main():
     # SELECT STRUCTURE
     num_qubits = 4
     alternate = True
-    repetitions = int(1.5*num_qubits)
 
     # SELECT CIRCUIT 
-    feature_map = 'Identity'
+    feature_map = 'ZZFeatureMap'
     var_ansatz = 'TwoLocal'
     # alternatively, can use a custom parametrized circuit of choice, i.e.
     # feature_map = TwoLocal(..)
@@ -20,6 +19,7 @@ def main():
     backend = 'Aer'
     path = './data/expr/'
 
+    repetitions = int(1.5*num_qubits) # test layers L = 1, ..., repetitions
     expr = compute_espressivity(num_qubits, repetitions, feature_map = feature_map, var_ansatz=var_ansatz, 
                                 backend=backend, path=path, plot=False, save=True)
 
