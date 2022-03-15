@@ -1,11 +1,21 @@
 # Random files
 qml_data/
+
+# Ent_char folder
 ent_char/.ipynb_checkpoints/
 ent_char/entanglement_characterization/data/
+ent_char/
+
+# Examples folder
 examples/data/
 examples/Ent_visualize_OLD.ipynb
 examples/Ent_visualize_Local.ipynb
 examples/Expr_visualize_Local.ipynb
+
+# Other files
+qcircha/visualize.py
+visualizer.ipynb
+
 
 # docs
 docs/_build
