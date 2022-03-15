@@ -10,11 +10,15 @@ Quantum circuit characterization (`qcircha`) contains the code necessary to char
 
 Both features are computed using an exact simulation of the quantum circuits, leveraging Qiskit's Aer for systems composed of a small number of qubits (tested up to 14 qubits), and a custom MPS simulator for a larger number of qubits (tested up to 50 qubits). Thus, this library enables the user to characterize variational quantum circuits of sizes typical of the NISQ era.
 
-## Usage
+## Installation
+
+Todo.
+
+## Usage and files description
 
 The `example` folder contains the most important scripts used to generate the plots in the manuscript. These and the accompanying notebooks are intended for direct use, while scripts in the `qcircha` directory contain the driving code for the simulations. [Qiskit](https://github.com/Qiskit) is used for the creation and manipulation of Quantum Circuits. 
 
-#### Examples
+#### examples/
 Here are the script and notebooks to perform the simulations, analyze the data, and plot the results presented in the paper. The files are: 
 1. `ent_study.py`: used to study the entanglement production inside a layered QNN with data reuploading with user-defined feature map and variational form. It is possible to use pre-defined circuit templates (see script `circuits.py` and `circuit_selector.py` below for a list of available pre-defined circuits), or even custom parametrized circuits created with Qiskit (in order to work, the circuits must have the attribute `.parameters`). The script can be used to generate data for studying the total entanglement production (function `ent_scaling`) or the entanglement distribution across bonds (`compute_bond_entanglement`). 
 
@@ -25,7 +29,7 @@ Here are the script and notebooks to perform the simulations, analyze the data, 
 4. `Entanglement.ipynb`: notebook used to analyze and plot the data generated with the `expr_study.py` script. 
 
 
-#### Description of the files
+#### qcircha/
 1. `entanglement_characterization.py`: is the main script in the library, where all the computation happens, and that is imported in all other scripts. Here you can pass a PQC of your choice, and select a simulation backend, MPS, or Qiskit's Aer. Several random parameter vectors (100 by default) are generated and the circuit is run this many times, and the entanglement entropy of the final state is saved. In the subdirectiroy `entanglement` there are scripts for the evaluation of the entanglement entropy of quantum states. 
 
 2. `experiments.py`: uses the simulation results from `entanglement_characterization.py` to perform various analyses and plots of the entanglement in the QNN circuit. In particular, here is the code for studying the total entanglement production and the entanglement distribution across bonds. 
