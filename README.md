@@ -1,65 +1,75 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 # Quantum Circuit characterization
 
-Repository with the code for the collaboration between Marco Ballarin, Riccardo Mengoni, Stefano Mangini.
+Code repository accompanying the paper *[MPS characterization of QNNs, arXiv:XXX](add_link)*, by Marco Ballarin, Riccardo Mengoni, Stefano Mangini, Chiara Macchiavello and Simone Montangero.
 
-Quantum circuit characterization (`qcircha`) contains the code necessary to characterize a variational quantum circuit
-on the following aspects:
+Quantum circuit characterization (`qcircha`) contains the code necessary to characterize the properties of variational quantum circuits, in particular:
 
-- the entanglement scaling
-- the KL-divergence of the probability distribution of the outputs compared to the Haar distribution
+- *entanglement*: measured in terms of the _entanglement entropy_ across bipartitions of the state created by the parametrized circuit; 
+- *expressibility*: as introduced in [Sim et al. 2019](https://arxiv.org/abs/1905.10876), is measured as the KL-divergence of the fidelity probability distribution of output states, compared to states sampled according to the Haar distribution.
 
-Both the aspects are computed for an exact simulation with a reduced number of qubits using qiskit, and for a larger
-number of qubits using an MPS simulator. This library so enable the user to characterize a variational quantum circuit
-of almost any size compatible to the NISQ era.
+Both features are computed using an exact simulation of the quantum circuits, leveraging Qiskit's Aer for systems composed of a small number of qubits (tested up to 14 qubits), and a custom MPS simulator for a larger number of qubits (tested up to 50 qubits). Thus, this library enables the user to characterize variational quantum circuits of sizes typical of the NISQ era.
 
-## Usage
+## Installation
 
-#### Description of the files
-1. `run_simulations.py`: is the main script in the folder, where all the computation happens, and that is imported in all other scripts. Here you can pass a PQC of your choice, and select a simulation backend, MPS or Qiskit's Aer. A number of random parameter vector (100 by default) is generated and the circuit is run this many times, and the entanglement entropy of the final state saved. In addition, there are also script for the evaluation of the entanglement entropy of haar-distributed quantum states. 
+Todo.
 
-2. `entanglement.py`: contains multiple analysis of the entanglement in the MPS circuit (alternate vs. non alternate, varying number of reps, entanglement saturation to haar states) and plots.
+## Usage and files description
 
-3. `scaling_reps.py`: pretty useless script to evaluate the optimal number of repetition to reach a final entanglement simular to haar-distributed states. Roughly, if the entanglement map is linear, then reps = num_qubits. If entanglement is either a2a or circular, then reps = 0.5 * num_qubits.
+The `example` folder contains the most important scripts used to generate the plots in the manuscript. These and the accompanying notebooks are intended for direct use, while scripts in the `qcircha` directory contain the driving code for the simulations. [Qiskit](https://github.com/Qiskit) is used for the creation and manipulation of Quantum Circuits. 
 
-4. `circuit.py`: definition of PQC for pre-defined ansatzed or general qnn given a feature map and a variational block. It is much improved wrt to the original file in the parent folder, as it now includes other ansatzes and the definition of names and metadatas for each circuit (see below).
+#### examples/
+Here are the script and notebooks to perform the simulations, analyze the data, and plot the results presented in the paper. The files are: 
+1. `ent_study.py`: used to study the entanglement production inside a layered QNN with data reuploading with user-defined feature map and variational form. It is possible to use pre-defined circuit templates (see script `circuits.py` and `circuit_selector.py` below for a list of available pre-defined circuits), or even custom parametrized circuits created with Qiskit (in order to work, the circuits must have the attribute `.parameters`). The script can be used to generate data for studying the total entanglement production (function `ent_scaling`) or the entanglement distribution across bonds (`compute_bond_entanglement`). 
 
-5. `visualizer.ipynb`: notebook for data analysys and plotting.  
+2. `Entanglement.ipynb`: notebook used to analyze and plot the data generated with the `ent_study.py` script. 
 
----  
+3. `expr_study.py`: used to study the expressibility of a layered QNN with data reuploading with user-defined feature map and variational forms (see above for details on the definition of the circuits).
+
+4. `Entanglement.ipynb`: notebook used to analyze and plot the data generated with the `expr_study.py` script. 
 
 
-#### Creating a QNN
-The script `circuits.py` contains a list of predefined quantum circuits to be used as feature maps or variational blocks. 
+#### qcircha/
+1. `entanglement_characterization.py`: is the main script in the library, where all the computation happens, and that is imported in all other scripts. Here you can pass a PQC of your choice, and select a simulation backend, MPS, or Qiskit's Aer. Several random parameter vectors (100 by default) are generated and the circuit is run this many times, and the entanglement entropy of the final state is saved. In the subdirectiroy `entanglement` there are scripts for the evaluation of the entanglement entropy of quantum states. 
 
-All of these are to be used inside the function `general_qnn()` which takes a template of a feature map and a variational block and creates the quantum neural network, given a number of repetitions, and order of operations (alternate or not).  
+2. `experiments.py`: uses the simulation results from `entanglement_characterization.py` to perform various analyses and plots of the entanglement in the QNN circuit. In particular, here is the code for studying the total entanglement production and the entanglement distribution across bonds. 
 
-All the circuits come with metadata information specifying the entanglement map (i.e linear, ring, a2a), as well as the name of the ansatz, and other relevant data used for logging.  
+3. `expressivity.py`: uses the simulation results from `entanglement_characterization.py` to evaluate the expressibility of a QNN, using the definition in [Sim et al. 2019](https://arxiv.org/abs/1905.10876). Such measure requires to construct a histogram of fidelities of states generated by the QNN, to be compared with random states sampled from the uniform Haar distribution. The default number of bins of the histogram is 100, the number of fidelities used to build the histogram is 4950 ( = (100**2 - 100) / 2), obtained by all possible different combinations of the 100 states generated by `entanglement_characterization.py`
 
----  
+4. `circuit.py`: contains some pre-defined parametrized quantum circuits to be used as feature maps or variational forms inside a QNN. Also, a code for creating a general QNN with data reuploading given a feature map, a variational block, and number of layers is present, see function `general_qnn`.
 
+5. `circuit_selector.py`: list of available pre-defined circuits, is used as an intermediate step to create QNNs using the definitions in the script `circuit.py`. Circuits for the `ZZFeatureMap` and `TwoLocal` schemes with all possible entangling topologies are defined.
+
+#### Managing QNNs and simulation results
+The scripts `circuits.py` and `circuit_selector.py` contain a list of predefined quantum circuits to be used as feature maps or variational blocks. 
+
+All of these are to be used inside the function `general_qnn` which takes a template of a feature map and a variational block and creates the quantum neural network, given a number of repetitions, and order of operations (alternate or sequential).  
+
+All the circuits and simulations results come with metadata information in accompanying `.json` files, specifying the entanglement map (i.e linear/nearest neighbors, ring/circular, full/all to all), as well as the name of the ansatz, and other relevant data used for logging (read below).  
 
 #### Saving data
-> **MODIFY PATH**  
-Remember to modify the path were scripts save data! In particular, modify the script `var_reps.py` and be sure that the folder "*data*" (or whatever you called it) exists, as the results are saved only at the end of the whole execution!
 
-The result of the executions are saved in a folder named "data", and in the subfolders:
-1. `data/ent_scaling/` for the script `entanglement.py` (see the funtion `entanglement_scaling`);
-2. `data/optimal_reps/` for the script `scaling_reps.py`.
+Remember to modify the path where scripts save data! By default simulation results from scripts `ent_study.py` and `expr_study.py` are saved inside the `examples/data/` folder.
 
-All data are saved with a unique name given by time of execution followed by a random indx, in a `.npy` format. In addition, with the same name there is an accompanying `.json` file wiht information about the performed simulation (i.e. ansatz, entanglement_map,  parameters, ...).
+Specifically, the result of the executions are saved in:
+1. `data/ent_scaling/` for the script `ent_study.py`;
+2. `data/expr/` for the script `expr_study.py`.
+
+All data are saved with a unique name given by time of execution followed by a random number, in a `.npy` format. In addition, with the very same name, there is an accompanying `.json` file with information about the performed simulation (i.e. ansatz, entanglement_map,  parameters, ...).
 
 
-## Requirement
+## Requirements
 
-To properly run these code you need the following packages:
+The following packages are required to run the code:
 
 - numpy
+- scipy
+- matplolib
 - qiskit
-- tn_py_frontend
-- qcomps
+- tn_py_frontend _(only needed for MPS simulation)_
+- qcomps _(only needed for MPS simulation)_
 
-The latter two packages are available from Marco Ballarin upon reasonable request
+The latter two packages are available from Marco Ballarin upon reasonable request.
 
 ## License
 

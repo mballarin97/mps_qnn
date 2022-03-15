@@ -7,19 +7,28 @@ def main():
     # SELECT STRUCTURE
     alternate = True
 
+    # SELECT CIRCUIT
+    feature_map = 'ZZFeatureMap'
+    var_ansatz = 'TwoLocal'
+    # alternatively, can use a custom parametrized circuit of choice, i.e.
+    # feature_map = TwoLocal(..)
+    # var_ansatz = QuantumCircuit(...)
+
     # SIMULATION BACKEND
     backend = 'Aer'
     # backend = 'MPS'
 
-    # TOTAL ENTANGLEMENT SCALING    
-    max_num_qubits = 12 # or np.arange(30, 51, 10)
-    entanglement_scaling(max_num_qubits, 
-                         feature_map='TwoLocal', var_ansatz="TwoLocal",
+    # ------------------------------------------------------------------
+    # 1. TOTAL ENTANGLEMENT SCALING
+    # If int: test qubits n = 4 to max_num_qubits; If list/array: tests n qubits in list
+    max_num_qubits = 12
+    entanglement_scaling(max_num_qubits,
+                         feature_map=feature_map, var_ansatz=var_ansatz,
                          alternate = alternate, backend = backend,
                          max_bond_dim = 1024, path='./data/ent_scaling/')
 
-
-    # ENTANGLEMENT ACROSS BIPARTITIONS
+    # ------------------------------------------------------------------
+    # 2. ENTANGLEMENT ACROSS BIPARTITIONS
     # num_qubits = 5
     # compute_bond_entanglement(num_qubits, 
     #                          feature_map='ZZFeatureMap', var_ansatz='TwoLocal', 
