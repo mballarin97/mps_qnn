@@ -4,4 +4,4 @@ scipy
 matplotlib
 seaborn
 tn_py_frontend
-qcomps
+qmatchatea

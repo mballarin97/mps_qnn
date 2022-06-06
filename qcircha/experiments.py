@@ -66,7 +66,7 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
     # Save data
     # path = './data/ent_scaling/'
     if not os.path.isdir(path):
-        os.mkdir(path) 
+        os.mkdir(path)
 
     timestamp = time.localtime()
     save_as = time.strftime("%Y-%m-%d_%H-%M-%S", timestamp) + '_' + str(np.random.randint(0, 1000))
@@ -83,10 +83,10 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
     var_ansatz = meta['var_ansatz'].split('-')[0]
     meta['fmap'] = fmap
     meta['var_ansatz'] = var_ansatz
-    
+
     with open(name+'.json', 'w') as file:
         json.dump(meta, file, indent=4)
-    
+
     ent_data = np.array(ent_data, dtype=object)
     np.save(name, ent_data, allow_pickle=True)
 
@@ -125,20 +125,20 @@ def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', b
     float
         Sum of the Haar entanglement along the bipartitions
     """
-    
-    ent_list, _ = compute_bond_entanglement(num_qubits, feature_map=feature_map, var_ansatz=var_ansatz, 
-                                            backend = backend, alternate = alternate, 
+
+    ent_list, _ = compute_bond_entanglement(num_qubits, feature_map=feature_map, var_ansatz=var_ansatz,
+                                            backend = backend, alternate = alternate,
                                             max_bond_dim = max_bond_dim)
 
     # Total Entanglement, sum accorss all bonds for a fixed repetition
-    tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1) # 
+    tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1)
 
     # Std deviation propagation for Total Entanglement, sum accorss all bonds for a fixed repetition
     tot_ent_per_rep_std = np.sqrt(np.sum(np.array(ent_list[:, 1, :])**2, axis=1))
 
     # Total Haar Entanglement, sum accorss all bonds for a fixed repetition
-    haar_ent = np.sum(ent_list[:, 2, :], axis=1) 
-   
+    haar_ent = np.sum(ent_list[:, 2, :], axis=1)
+
     return tot_ent_per_rep, tot_ent_per_rep_std, haar_ent[0]
 
 def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', alternate = True,
@@ -189,10 +189,10 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
         # Pick a PQC (modify the function)
         ansatz = pick_circuit(num_qubits, num_reps, feature_map=feature_map,
                               var_ansatz=var_ansatz, alternate = alternate)
-        
+
         # If MPS, add max_bond_dim to circuit's metadata
         if backend == "MPS":
-            data = ansatz.metadata 
+            data = ansatz.metadata
             data['max_bond_dim'] = max_bond_dim
             ansatz.metadata = data
 

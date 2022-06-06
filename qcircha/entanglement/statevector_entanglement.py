@@ -18,7 +18,7 @@ from scipy.stats import entropy
 __all__ = ['get_reduced_density_matrix', 'entanglement_entropy', 'von_neumann_entropy',
     'entanglement_bond']
 
-def get_reduced_density_matrix(psi, loc_dim, n_sites, sites, 
+def get_reduced_density_matrix(psi, loc_dim, n_sites, sites,
     print_rho=False):
     """
     Parameters
@@ -50,7 +50,7 @@ def get_reduced_density_matrix(psi, loc_dim, n_sites, sites,
 
     if np.isscalar(sites):
         sites = [sites]
-    
+
     # RESHAPE psi
     psi_copy=psi.reshape(*[loc_dim for _ in range(int(n_sites))])
     # DEFINE A LIST OF SITES WE WANT TO TRACE OUT
@@ -85,7 +85,7 @@ def entanglement_entropy(statevector, idx_to_trace=None):
         Statevector of the system
     idx_to_trace : array-like, optional
         Indexes to trace away. By default None.
-    
+
     Returns
     -------
     float
@@ -115,7 +115,7 @@ def entanglement_bond(statevector):
     ----------
     statevector : array-like
         Statevector of the system
-    
+
     Returns
     -------
     array-like of floats
@@ -126,10 +126,10 @@ def entanglement_bond(statevector):
         raise ValueError(f'Amplitudes of the statevector must sum up to 1, not to {sum_amplitudes}')
 
     num_qubits = int(np.log2(len(statevector)))
-    
+
     # Cut along the first half of the bond
     res1 = [entanglement_entropy(statevector, idx_to_trace=range(i+1, num_qubits)) for i in range(int(num_qubits/2))]
-    
+
     # Cut along the second half
     res2 = [entanglement_entropy(statevector, idx_to_trace=range(0, i)) for i in range(1+int(num_qubits/2), num_qubits)]
     res = res1 + res2
@@ -148,18 +148,16 @@ def von_neumann_entropy(eigvs, base = np.e):
     ----------
     eigvs : array-like of floats
         Eigenvalues of the density matrix
-    
+
     Returns
     -------
     float
         entanglement entropy
     """
-    
+
     # Clean from negative negligible eigenvalues (zero up to machine precision)
-    if min(eigvs) <= -1e-15:
-        raise ValueError(f"Negative eigenvalue in reduced density matrix encountered = {min(eigvs)}")
     eigvs = np.array([max(0., eig) for eig in eigvs])
-    
+
     entanglement = entropy(eigvs, base = base) #-np.sum( eigvs*np.log(eigvs) )
 
 

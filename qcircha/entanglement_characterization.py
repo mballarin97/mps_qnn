@@ -15,9 +15,10 @@ Contains main computational methods
 # Import necessary modules
 import time
 
-from qcomps import run_simulation
-from qcomps.qk_utils import qk_transpilation_params
-from qcomps import QCConvergenceParameters
+from qmatchatea import run_simulation
+from qmatchatea.qk_utils import qk_transpilation_params
+from qmatchatea import QCConvergenceParameters
+import tn_py_frontend.observables as obs
 import numpy as np
 
 from qiskit import Aer, transpile
@@ -49,12 +50,16 @@ def _run_mps(qc, max_bond_dim=1024, do_statevector=False):
         The results of the simulations, comprehensive of the entanglement
     """
 
+    observables = obs.TNObservables()
+    observables += obs.TNObsBondEntropy()
+    if do_statevector:
+        observables += obs.TNState2File('mps_state.txt', 'F')
     conv_params = QCConvergenceParameters(max_bond_dim)
     trans_params = qk_transpilation_params(linearize=True)
 
     results = run_simulation(qc, convergence_parameters=conv_params,
-                             transpilation_parameters=trans_params, do_entanglement=True,
-                             approach='PY', save_mps='N', do_statevector=do_statevector)
+                             transpilation_parameters=trans_params, approach='PY',
+                             observables=observables)
 
     return results
 
@@ -109,7 +114,7 @@ def _mps_simulation(qc, random_params, max_bond_dim=1024, do_statevector=False):
         Array of statevectors if do_statevector=True, otherwise array of None
     """
     sim_bknd = Aer.get_backend('statevector_simulator')
-        
+
     mps_results_list = []
     statevector_list = []
     for idx, params in enumerate(random_params):
@@ -117,10 +122,11 @@ def _mps_simulation(qc, random_params, max_bond_dim=1024, do_statevector=False):
         qc = transpile(qc, sim_bknd) # Why this transpilation?
         mps_results = _run_circuit(qc, params, max_bond_dim=max_bond_dim,
             do_statevector=do_statevector)
-        
+
         mps_results_list.append(mps_results)
 
-    mps_entanglement = np.array([res.entanglement for res in mps_results_list])
+    #print(mps_results_list[0].entanglement )
+    mps_entanglement = np.array([list(res.entanglement.values()) for res in mps_results_list])
     ent_means = np.mean(mps_entanglement, axis=0)
     ent_std = np.std(mps_entanglement, axis=0)
     statevector_list = [res.statevector for res in mps_results_list]
@@ -157,7 +163,7 @@ def _aer_simulation(qc, random_params, get_statevector = False):
         print(f"Run {idx}/{len(random_params)}", end="\r")
         qk_results = sim_bknd.run(qc_t.assign_parameters(params))
         qk_results_list.append(np.asarray(qk_results.result().get_statevector()))
-    
+
     print("\nPartial tracing...")
     now = time.time()
     aer_ent = np.array([entanglement_bond(state) for state in qk_results_list])
@@ -204,9 +210,9 @@ def entanglement_characterization(ansatz = None, backend = 'Aer', get_statevecto
 
     try:
         max_bond_dim = metadata['max_bond_dim']
-    except: 
-        max_bond_dim = 1_024
-             
+    except:
+        max_bond_dim = 100
+
 
     ######################################################
     # GENERATE RANDOM PARAMETERS (both inputs and weights)
@@ -220,7 +226,7 @@ def entanglement_characterization(ansatz = None, backend = 'Aer', get_statevecto
             max_bond_dim = kwargs['max_bond_dim']
         ent_means, ent_std, statevectors = _mps_simulation(ansatz, random_params, max_bond_dim, do_statevector=get_statevector)
 
-    elif backend == 'Aer':  
+    elif backend == 'Aer':
         ent_means, ent_std, statevectors = _aer_simulation(ansatz, random_params, get_statevector=get_statevector)
 
     else:

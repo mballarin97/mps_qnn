@@ -33,8 +33,9 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
     - 'Circuit15' : circuit with ring entanglement, defined in (n.15 from Kim et al.)
     - 'Circuit12' : circuit with linear entanglement and a piramidal structure, defined in (n.12 from Kim et al.)
     - 'Circuit1' : circuit without entanglement with two single qubits rotations per qubit (n.1 from Kim et al.)
+    - 'Identity' : identity circuit
     - 'Circuit9' : circuit n. 9 from Kim et al.
-    - variations of TwoLocal structures are present. 
+    - variations of TwoLocal structures are present.
 
     Parameters
     ----------
@@ -80,11 +81,11 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
         in the Power of Quantum Neural networks by Abbas et al.
     - 'TwoLocal' : circuit with linear entanglement, used as ansatz in
         the Power of Quantum Neural networks by Abbas et al.
-    - 'Circuit15' : circuit with ring entanglement, defined in  
+    - 'Circuit15' : circuit with ring entanglement, defined in
         (n.15 from Kim et al.)
     - 'Circuit12' : circuit with linear entanglement and a piramidal
         structure, defined in (n.12 from Kim et al.)
-    - 'Circuit1' : easy circuit without entanglement (n.1 from Kim et al.) 
+    - 'Circuit1' : easy circuit without entanglement (n.1 from Kim et al.)
     - 'circuit9' : circuit n. 9 from Kim et al.
 
     Parameters
@@ -95,13 +96,13 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
         Type of circuit. Available options in the description. If a
         :py:class:`QuantumCircuit` it is used instead of the default ones.
         Default to 'ZZFeatureMap'.
-    
+
     Return
     ------
     :py:class:`QuantumCircuit`
         Selected quantum circuit
     """
-    
+
     # If it is a quantum circuit, directly return that.
     # Otherwise, go through the list
     if not isinstance(circ, QuantumCircuit):
@@ -124,7 +125,7 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
 
         elif circ == 'twolocal_ring':
             circ = TwoLocal(num_qubits, 'ry', 'cx', 'circular', reps=1, skip_final_rotation_layer=True)
-        
+
         elif circ == 'zzfeaturemap_full':
             circ = ZZFeatureMap(num_qubits, reps=1, entanglement='full')
 
@@ -163,7 +164,7 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
 
         elif circ == 'circuit12':
             circ = circuit12(num_qubits, num_reps=1, piramidal=True, barrier=False)
-        
+
         elif circ == 'circuit9':
             circ = circuit9(num_qubits, num_reps=1, barrier = False)
 
@@ -172,10 +173,10 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
 
         elif circ == 'circuit1':
             circ = circuit1(num_qubits, num_reps = 1, barrier = False)
-        
+
         elif circ == 'identity':
             circ = identity(num_qubits)
-        
+
         else:
             raise ValueError(f'Circuit {circ} is not implemented.')
 
