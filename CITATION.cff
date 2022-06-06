@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Ballarin"
+  given-names: "Marco"
+- family-names: "Mangini"
+  given-names: "Stefano"
+- family-names: "Montangero"
+  given-names: "Simone"
+- family-names: "Macchiavello"
+  given-names: "Chiara"
+- family-names: "Mengoni"
+  given-names: "Riccardo"
+title: "Entanglement entropy production in Quantum neural networks"
+version: 0.0.0
+date-released: 2022-06-06
+url: "https://github.com/mballarin97/mps_qnn"
+preferred-citation:
+  type: article
