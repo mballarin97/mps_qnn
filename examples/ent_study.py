@@ -1,6 +1,14 @@
-import numpy as np
-from qcircha import entanglement_scaling, compute_bond_entanglement
-from qiskit.circuit.library import TwoLocal
+# This code is part of qcircha.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+from qcircha import entanglement_scaling
 
 def main():
 
@@ -15,13 +23,13 @@ def main():
     # var_ansatz = QuantumCircuit(...)
 
     # SIMULATION BACKEND
-    backend = 'Aer'
-    # backend = 'MPS'
+    # backend = 'Aer'
+    backend = 'MPS'
 
     # ------------------------------------------------------------------
     # 1. TOTAL ENTANGLEMENT SCALING
     # If int: test qubits n = 4 to max_num_qubits; If list/array: tests n qubits in list
-    max_num_qubits = 12
+    max_num_qubits = 6
     entanglement_scaling(max_num_qubits,
                          feature_map=feature_map, var_ansatz=var_ansatz,
                          alternate = alternate, backend = backend,
@@ -30,9 +38,9 @@ def main():
     # ------------------------------------------------------------------
     # 2. ENTANGLEMENT ACROSS BIPARTITIONS
     # num_qubits = 5
-    # compute_bond_entanglement(num_qubits, 
-    #                          feature_map='ZZFeatureMap', var_ansatz='TwoLocal', 
-    #                          alternate=True, backend = backend, 
+    # compute_bond_entanglement(num_qubits,
+    #                          feature_map='ZZFeatureMap', var_ansatz='TwoLocal',
+    #                          alternate=True, backend = backend,
     #                          plot=True, max_bond_dim=None)
 
 if __name__ == '__main__':
