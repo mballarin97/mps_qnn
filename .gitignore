@@ -1,6 +1,15 @@
 # Random files
 qml_data/
 
+# Images
+examples/ZZFeatureMap_TwoLocal_ZZFeatureMap_ring_TwoLocal_ring_Circuit1_TwoLocal_final.pdf
+examples/complete_comparison_final.pdf
+examples/complete_comparison_final2.pdf
+examples/complete_comparison_final3.pdf
+examples/entanglement_diff_3d_final.pdf
+examples/expr_linear_comparison_final.pdf
+examples/normalized_entanglement_final.pdf
+
 # Ent_char folder
 ent_char/.ipynb_checkpoints/
 ent_char/entanglement_characterization/data/
