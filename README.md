@@ -2,7 +2,7 @@
 
 # Quantum Circuit characterization
 
-Code repository accompanying the paper *[MPS characterization of QNNs, arXiv:XXX](add_link)*, by Marco Ballarin, Riccardo Mengoni, Stefano Mangini, Chiara Macchiavello and Simone Montangero.
+Code repository accompanying the paper *[MPS characterization of QNNs, arXiv:XXX](https://arxiv.org/abs/2206.02474)*, by Marco Ballarin, Riccardo Mengoni, Stefano Mangini, Chiara Macchiavello and Simone Montangero.
 
 Quantum circuit characterization (`qcircha`) contains the code necessary to characterize the properties of variational quantum circuits, in particular:
 
