@@ -14,11 +14,14 @@ Contains main computational methods
 
 # Import necessary modules
 import time
-
-from qmatchatea import run_simulation
-from qmatchatea.qk_utils import qk_transpilation_params
-from qmatchatea import QCConvergenceParameters
-import tn_py_frontend.observables as obs
+try:
+    from qmatchatea import run_simulation
+    from qmatchatea.qk_utils import qk_transpilation_params
+    from qmatchatea import QCConvergenceParameters
+    import tn_py_frontend.observables as obs
+    MPS_AVAILABLE = True
+except ImportError:
+    MPS_AVAILABLE = False
 import numpy as np
 
 from qiskit import Aer, transpile
@@ -222,6 +225,8 @@ def entanglement_characterization(ansatz = None, backend = 'Aer', get_statevecto
     ######################################################
     # SIMULATION WITH MPS or Aer
     if backend == 'MPS':
+        if not MPS_AVAILABLE:
+            raise RuntimeError('MPS package qmatcha is not installed, so MPS simulation cannot be ran')
         if 'max_bond_dim' in kwargs:
             max_bond_dim = kwargs['max_bond_dim']
         ent_means, ent_std, statevectors = _mps_simulation(ansatz, random_params, max_bond_dim, do_statevector=get_statevector)
