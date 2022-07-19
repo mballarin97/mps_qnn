@@ -2,11 +2,11 @@
 
 # Quantum Circuit characterization
 
-Code repository accompanying the paper *[MPS characterization of QNNs, arXiv:XXX](https://arxiv.org/abs/2206.02474)*, by Marco Ballarin, Riccardo Mengoni, Stefano Mangini, Chiara Macchiavello and Simone Montangero.
+Code repository accompanying the paper *[MPS characterization of QNNs, arXiv:2206.02474](https://arxiv.org/abs/2206.02474)*, by Marco Ballarin, Riccardo Mengoni, Stefano Mangini, Chiara Macchiavello and Simone Montangero.
 
 Quantum circuit characterization (`qcircha`) contains the code necessary to characterize the properties of variational quantum circuits, in particular:
 
-- *entanglement*: measured in terms of the _entanglement entropy_ across bipartitions of the state created by the parametrized circuit;
+- *entanglement*: measured in terms of the *entanglement entropy* across bipartitions of the state created by the parametrized circuit;
 - *expressibility*: as introduced in [Sim et al. 2019](https://arxiv.org/abs/1905.10876), is measured as the KL-divergence of the fidelity probability distribution of output states, compared to states sampled according to the Haar distribution.
 
 Both features are computed using an exact simulation of the quantum circuits, leveraging Qiskit's Aer for systems composed of a small number of qubits (tested up to 14 qubits), and a custom MPS simulator for a larger number of qubits (tested up to 50 qubits). Thus, this library enables the user to characterize variational quantum circuits of sizes typical of the NISQ era.
@@ -17,37 +17,47 @@ To install the library, once the dependencies are installed, simply sun `pip ins
 
 ## Usage and files description
 
-The `example` folder contains the most important scripts used to generate the plots in the manuscript. These and the accompanying notebooks are intended for direct use, while scripts in the `qcircha` directory contain the driving code for the simulations. [Qiskit](https://github.com/Qiskit) is used for the creation and manipulation of Quantum Circuits.
+The `examples` folder contains the most important scripts used to generate the plots in the manuscript. These and the accompanying notebooks are intended for direct use, while scripts in the `qcircha` directory contain the driving code for the simulations. [Qiskit](https://github.com/Qiskit) is used for the creation and manipulation of Quantum Circuits.
 
-### examples/
+### Examples
 
-Here are the script and notebooks to perform the simulations, analyze the data, and plot the results presented in the paper. The files are:
+In the folder `examples` we report the script and notebooks to perform the simulations, analyze the data, and plot the results presented in the paper. The files are:
 
-1. `ent_study.py`: used to study the entanglement production inside a layered QNN with data reuploading with user-defined feature map and variational form. It is possible to use pre-defined circuit templates (see script `circuits.py` and `circuit_selector.py` below for a list of available pre-defined circuits), or even custom parametrized circuits created with Qiskit (in order to work, the circuits must have the attribute `.parameters`). The script can be used to generate data for studying the total entanglement production (function `ent_scaling`) or the entanglement distribution across bonds (`compute_bond_entanglement`). 
+<details>
+   <summary>`ent_study.py`</summary>
 
-2. `Entanglement.ipynb`: notebook used to analyze and plot the data generated with the `ent_study.py` script. 
+   In this example, we show how to study the entanglement production inside a layered QNN with data reuploading with user-defined feature map and variational form. It is possible to use pre-defined circuit templates (see script `circuits.py` and `circuit_selector.py` below for a list of available pre-defined circuits), or even custom parametrized circuits created with Qiskit (in order to work, the circuits must have the attribute `.parameters`). The script can be used to generate data for studying the total entanglement production (function `ent_scaling`) or the entanglement distribution across bonds (`compute_bond_entanglement`).
+</details>
 
-3. `expr_study.py`: used to study the expressibility of a layered QNN with data reuploading with user-defined feature map and variational forms (see above for details on the definition of the circuits).
+<details>
+   <summary>`Entanglement.ipynb`</summary>
 
-4. `Entanglement.ipynb`: notebook used to analyze and plot the data generated with the `expr_study.py` script. 
+   Notebook used to analyze and plot the data generated with the `ent_study.py` script.
+</details>
 
-### qcircha
+<details>
+   <summary>`expr_study.py`</summary>
 
-1. `entanglement_characterization.py`: is the main script in the library, where all the computation happens, and that is imported in all other scripts. Here you can pass a PQC of your choice, and select a simulation backend, MPS, or Qiskit's Aer. Several random parameter vectors (100 by default) are generated and the circuit is run this many times, and the entanglement entropy of the final state is saved. In the subdirectiroy `entanglement` there are scripts for the evaluation of the entanglement entropy of quantum states. 
+   Used to study the expressibility of a layered QNN with data reuploading with user-defined feature map and variational forms (see above for details on the definition of the circuits).
+</details>
 
-2. `experiments.py`: uses the simulation results from `entanglement_characterization.py` to perform various analyses and plots of the entanglement in the QNN circuit. In particular, here is the code for studying the total entanglement production and the entanglement distribution across bonds.
+<details>
+   <summary>`ent_study.py`</summary>
+</details>
 
-3. `expressivity.py`: uses the simulation results from `entanglement_characterization.py` to evaluate the expressibility of a QNN, using the definition in [Sim et al. 2019](https://arxiv.org/abs/1905.10876). Such measure requires to construct a histogram of fidelities of states generated by the QNN, to be compared with random states sampled from the uniform Haar distribution. The default number of bins of the histogram is 100, the number of fidelities used to build the histogram is 4950 ( = (100**2 - 100) / 2), obtained by all possible different combinations of the 100 states generated by `entanglement_characterization.py`
+<details>
+   <summary>`gaussian_distribution.py`</summary>
 
-4. `circuit.py`: contains some pre-defined parametrized quantum circuits to be used as feature maps or variational forms inside a QNN. Also, a code for creating a general QNN with data reuploading given a feature map, a variational block, and number of layers is present, see function `general_qnn`.
-
-5. `circuit_selector.py`: list of available pre-defined circuits, is used as an intermediate step to create QNNs using the definitions in the script `circuit.py`. Circuits for the `ZZFeatureMap` and `TwoLocal` schemes with all possible entangling topologies are defined.
+   Example to show how to change the random distribution from which the parameters are sampled.
+   This script produces output files that are slightly different from the usual ones, and are
+   described in the header of the example file.
+</details>
 
 #### Managing QNNs and simulation results
 
 The scripts `circuits.py` and `circuit_selector.py` contain a list of predefined quantum circuits to be used as feature maps or variational blocks.
 
-All of these are to be used inside the function `general_qnn` which takes a template of a feature map and a variational block and creates the quantum neural network, given a number of repetitions, and order of operations (alternate or sequential).  
+All of these are to be used inside the function `general_qnn` which takes a template of a feature map and a variational block and creates the quantum neural network, given a number of repetitions, and order of operations (alternate or sequential).
 
 All the circuits and simulations results come with metadata information in accompanying `.json` files, specifying the entanglement map (i.e linear/nearest neighbors, ring/circular, full/all to all), as well as the name of the ansatz, and other relevant data used for logging (read below).
 
@@ -70,8 +80,8 @@ The following packages are required to run the code:
 - scipy
 - matplolib
 - qiskit
-- tn_py_frontend _(only needed for MPS simulation)_
-- qmatchatea _(only needed for MPS simulation)_
+- tn_py_frontend *(only needed for MPS simulation)*
+- qmatchatea *(only needed for MPS simulation)*
 
 The latter two packages are available from Marco Ballarin upon reasonable request.
 
