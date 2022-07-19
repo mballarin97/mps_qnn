@@ -9,7 +9,10 @@
 # that they have been altered from the originals.
 
 """
-Functions to create and manage QNNs, in addition to some pre-defined structures.  
+Functions to create and manage QNNs, in addition to some pre-defined structures.
+It is used as an intermediate step to create QNNs using the definitions
+in the script `circuit.py`. Circuits for the `ZZFeatureMap` and `TwoLocal`
+schemes with all possible entangling topologies are defined.
 """
 
 # Import necessary modules

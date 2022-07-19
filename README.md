@@ -21,7 +21,30 @@ The `examples` folder contains the most important scripts used to generate the p
 
 ### Examples
 
-In the folder `examples` we report the script and notebooks to perform the simulations, analyze the data, and plot the results presented in the paper. The files are:
+To run a simple experiment is is sufficient to run:
+
+```python
+from qcircha import entanglement_scaling
+
+alternate = True             # Alternate structure
+feature_map = 'ZZFeatureMap' # Feature map of the QNN
+var_ansatz = 'TwoLocal'      # Variational ansatz of the QNN
+backend = 'Aer'              # Use qiskit backend
+max_num_qubits = 6           # Simulation will be ran from 4 to max_num_qubits
+OUT_PATH = './ent_scaling/'  # Path to save results
+num_trials = 100             # Number of experiments ran for computing the average
+
+entanglement_scaling(max_num_qubits,
+                         feature_map=feature_map, var_ansatz=var_ansatz,
+                         alternate = alternate, backend = backend, path=OUT_PATH,
+                         num_trials = num_trials)
+```
+
+The results will be saved inside the `OUT_PATH/` folder, and it will be possible to
+access them later. For an example of how to load the data, see the first cells of
+the notebook `examples/Entanglement.ipynb`.
+
+However, in the folder `examples` we report the script and notebooks to perform the simulations, analyze the data, and plot the results presented in the paper. The files are:
 
 <details>
    <summary>`ent_study.py`</summary>
