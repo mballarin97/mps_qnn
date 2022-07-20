@@ -16,13 +16,13 @@ set of qubits
 from qcircha import compute_bond_entanglement
 import numpy as np
 
-num_qubits = np.arange(4, 15, 2)
+num_qubits = np.arange(4, 6, 2)
 alternate_possibilities = (True,)
 
 for num_qub in num_qubits:
     for alternate in alternate_possibilities:
         ent, _ = compute_bond_entanglement(num_qub, feature_map='twolocal',
-        var_ansatz='twolocal', alternate=alternate, backend='Aer')
+        var_ansatz='twolocal', alternate=alternate, backend='MPS')
 
         ent_haar = ent[0, 2, :]
         ent_means = ent[:, 0, :]

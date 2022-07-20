@@ -9,7 +9,13 @@
 # that they have been altered from the originals.
 
 """
-Contains main computational methods
+Main script in the library, where all the computation happens,
+and that is imported in all other scripts. Here you can pass a PQC of your choice,
+and select a simulation backend, MPS, or Qiskit's Aer.
+Several random parameter vectors (100 by default) are generated and the circuit
+is run this many times, and the entanglement entropy of the final state is saved.
+In the subdirectiroy `entanglement` there are scripts for the evaluation of the
+entanglement entropy of quantum states.
 """
 
 # Import necessary modules
@@ -180,7 +186,7 @@ def _aer_simulation(qc, random_params, get_statevector = False):
     return ent_means, ent_std, qk_results_list
 
 def entanglement_characterization(ansatz = None, backend = 'Aer', get_statevector = False,
-    **kwargs):
+    distribution=None, trials=100, **kwargs):
     """
     Main method to perform the computation, given the simulation
     details of the ansatz
@@ -193,6 +199,16 @@ def entanglement_characterization(ansatz = None, backend = 'Aer', get_statevecto
         backend of the simulation. Possible: 'MPS', 'Aer', by default 'Aer'
     get_statevector : bool, optional
         If True, returns the statevector, by default False
+    distribution : callable, optional
+        Function to generate the random parameters that will be used
+        in the simulation. It should take only a tuple as input, which
+        is the shape of the generated numpy array. If None, use random
+        parameters uniformly distributed in :math:`U(0, \\pi)`.
+        To obtain this distribution you might use the numpy.random module
+        with the aid of functools.partial. Default to None.
+    trials : int, optional
+        Number of repetitions over which the average is taken.
+        Default to 100.
 
     Returns
     -------
@@ -219,8 +235,13 @@ def entanglement_characterization(ansatz = None, backend = 'Aer', get_statevecto
 
     ######################################################
     # GENERATE RANDOM PARAMETERS (both inputs and weights)
-    trials = 1_00
-    random_params = np.pi * np.random.rand(trials, len(ansatz.parameters))
+    if distribution is None:
+        random_params = np.pi * np.random.rand(trials, len(ansatz.parameters))
+    elif callable(distribution):
+        random_params = distribution( (trials, len(ansatz.parameters)) )
+    else:
+        raise TypeError('The variable distribution should be a callable or None, '
+        + f'not {type(distribution)}')
 
     ######################################################
     # SIMULATION WITH MPS or Aer

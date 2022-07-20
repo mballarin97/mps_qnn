@@ -47,7 +47,7 @@ def gather_data(key = None, value = None, path = None):
             if len(model_data['var_ansatz'].split('-')) > 1:
                 #print("Changing name! [can ignore]")
                 model_data['var_ansatz'] = model_data['var_ansatz'].split('-')[0]
-                        
+
             if all([model_data[k] == v for k, v in zip(key, value)]):
                 idx = file[:-5]  # delete ".json"
                 idx_list.append(idx)
@@ -76,7 +76,7 @@ def logger(data):
 
 class HiddenPrints:
     """
-    Describe 
+    Describe
     """
     def __enter__(self):
         self._original_stdout = sys.stdout

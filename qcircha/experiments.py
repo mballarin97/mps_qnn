@@ -8,6 +8,13 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+"""
+Uses the simulation results from `entanglement_characterization.py`
+to perform various analyses and plots of the entanglement in the QNN
+circuit. In particular, here is the code for studying the total
+entanglement production and the entanglement distribution across bonds.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -21,7 +28,8 @@ from qcircha.utils import removekey
 __all__ = ['entanglement_scaling', 'ent_vs_reps', 'compute_bond_entanglement']
 
 def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_ansatz='TwoLocal',
-    backend = 'Aer', path = './data/ent_scaling/', alternate = True, max_bond_dim=1024):
+    backend = 'Aer', depths = None, distribution = None, num_trials = 100,
+    path = './data/ent_scaling/', alternate = True, max_bond_dim=1024):
     """
     Study of the total entanglement in the MPS state, varying the number of qubits,
     and save them in `path` in a file with the format "%Y-%m-%d_%H-%M-%S".
@@ -40,6 +48,23 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
         Default to 'TwoLocal'.
     backend : str, optional
         Computational backend. Possible: 'Aer', 'MPS'. by default 'Aer'
+    depths : int or arraylike, optional
+        Number of layers of feature map+ansatz in the circuit.
+        - If it is an integer, then range(1, depths) is used.
+        - If it is an array-like, the depths are obtained iterating over the
+          array
+        - If None, a maximum depth of `1.5*num_qubits` is used.
+        Default to None.
+    distribution : callable, optional
+        Function to generate the random parameters that will be used
+        in the simulation. It should take only a tuple as input, which
+        is the shape of the generated numpy array. If None, use random
+        parameters uniformly distributed in :math:`U(0, \\pi)`.
+        To obtain this distribution you might use the numpy.random module
+        with the aid of functools.partial. Default to None.
+    num_trials : int, optional
+        Number of repetitions of a single circuit over which the
+        average is taken. Default to 100.
     path : str, optional
         path for saving data, by default './data/ent_scaling/'
     alternate : bool, optional
@@ -60,7 +85,8 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
     ent_data = []
     for nqubits in qubits_range:
         tmp = ent_vs_reps(nqubits, feature_map=feature_map, var_ansatz=var_ansatz,
-            backend=backend, alternate=alternate, max_bond_dim=max_bond_dim)
+            backend=backend, alternate=alternate, max_bond_dim=max_bond_dim,
+            depths=depths, distribution=distribution, num_trials=num_trials)
         ent_data.append(tmp)
 
     # Save data
@@ -74,7 +100,8 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
 
     # Save details of the ansatz
     ansatz = pick_circuit(2, 2, feature_map = feature_map, var_ansatz = var_ansatz, alternate=alternate)
-    meta = dict({"max_num_qubits": max_num_qubits, "backend": backend})
+    meta = dict({"max_num_qubits": max_num_qubits, "backend": backend, "num_trials":num_trials,
+        "depths" : depths})
     circ_data = removekey(ansatz.metadata, ["num_qubits", "num_reps", "params"])
     meta.update(circ_data)  # add metadata from the ansatz
 
@@ -91,9 +118,10 @@ def entanglement_scaling(max_num_qubits = 10, feature_map='ZZFeatureMap', var_an
     np.save(name, ent_data, allow_pickle=True)
 
 
-def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', backend = 'Aer', alternate = True, max_bond_dim=1024):
+def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', backend = 'Aer',
+    alternate = True,  depths = None, distribution = None, num_trials = 100, max_bond_dim=1024):
     """
-    Evaluate the total entanglement (sum of entanglement accross bipartitions) in the MPS quantum state, 
+    Evaluate the total entanglement (sum of entanglement accross bipartitions) in the MPS quantum state,
     for various repetitions of the ansatz, for a fixed number of qubits.
 
     Parameters
@@ -110,6 +138,23 @@ def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', b
         Default to 'TwoLocal'.
     backend : str, optional
         Computational backend. Possible: 'Aer', 'MPS'. by default 'Aer'
+    depths : int or arraylike, optional
+        Number of layers of feature map+ansatz in the circuit.
+        - If it is an integer, then range(1, depths) is used.
+        - If it is an array-like, the depths are obtained iterating over the
+          array
+        - If None, a maximum depth of `1.5*num_qubits` is used.
+        Default to None.
+    distribution : callable, optional
+        Function to generate the random parameters that will be used
+        in the simulation. It should take only a tuple as input, which
+        is the shape of the generated numpy array. If None, use random
+        parameters uniformly distributed in :math:`U(0, \\pi)`.
+        To obtain this distribution you might use the numpy.random module
+        with the aid of functools.partial. Default to None.
+    num_trials : int, optional
+        Number of repetitions of a single circuit over which the
+        average is taken. Default to 100.
     alternate : bool, optional
         If the circuit structure for feature_map/ansatz is alternated (True) or
         we apply first all the feature maps and then all the ansatz (False). Default to True
@@ -128,7 +173,8 @@ def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', b
 
     ent_list, _ = compute_bond_entanglement(num_qubits, feature_map=feature_map, var_ansatz=var_ansatz,
                                             backend = backend, alternate = alternate,
-                                            max_bond_dim = max_bond_dim)
+                                            max_bond_dim = max_bond_dim, depths=depths,
+                                            distribution=distribution, num_trials=num_trials)
 
     # Total Entanglement, sum accorss all bonds for a fixed repetition
     tot_ent_per_rep = np.sum(ent_list[: , 0, :], axis = 1)
@@ -141,8 +187,9 @@ def ent_vs_reps(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', b
 
     return tot_ent_per_rep, tot_ent_per_rep_std, haar_ent[0]
 
-def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal', alternate = True,
-    backend = 'Aer', plot = False, max_bond_dim = None):
+def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz='TwoLocal',
+    alternate = True, backend = 'Aer', depths = None, distribution = None, num_trials = 100,
+    plot = False, max_bond_dim = None):
     """
     Evaluate entanglement entropy accross bonds, varying the repetitions of the variational ansatz,
     for a fixed number of qubits.
@@ -165,6 +212,23 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
         then all the ansatz repetitions (False). Default to True.
     backend : str, optional
         Computational backend. Possible 'MPS' or 'Aer', by default 'Aer'
+    depths : int or arraylike, optional
+        Number of layers of feature map+ansatz in the circuit.
+        - If it is an integer, then range(1, depths) is used.
+        - If it is an array-like, the depths are obtained iterating over the
+          array
+        - If None, a maximum depth of `1.5*num_qubits` is used.
+        Default to None.
+    distribution : callable, optional
+        Function to generate the random parameters that will be used
+        in the simulation. It should take only a tuple as input, which
+        is the shape of the generated numpy array. If None, use random
+        parameters uniformly distributed in :math:`U(0, \\pi)`.
+        To obtain this distribution you might use the numpy.random module
+        with the aid of functools.partial. Default to None.
+    num_trials : int, optional
+        Number of repetitions of a single circuit over which the
+        average is taken. Default to 100.
     plot : bool, optional
         If True, perform some plots at the end, by default False
     max_bond_dim : int, optional
@@ -180,11 +244,16 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
     ####################################################################
     # Entanglement in circuit and haar
-    max_rep = int(1.5*num_qubits)
+    if depths is None:
+        depths = int(1.5*num_qubits)
+
+    if np.isscalar(depths):
+        depths = np.arange(1, int(depths) )
+
 
     ent_list = []
-    for num_reps in range(1, max_rep):
-        print(f"\n__Reps {num_reps}/{max_rep}")
+    for num_reps in depths:
+        print(f"\n__Reps {num_reps}/{np.max(depths)}")
 
         # Pick a PQC (modify the function)
         ansatz = pick_circuit(num_qubits, num_reps, feature_map=feature_map,
@@ -197,15 +266,16 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
             ansatz.metadata = data
 
         # Run simulation and save result
-        tmp = entanglement_characterization(ansatz=ansatz, backend=backend)
+        tmp = entanglement_characterization(ansatz=ansatz, backend=backend,
+            distribution=distribution, trials=num_trials)
         ent_list.append(tmp[:-1])
 
     ent_list = np.array(ent_list)
-    
+
     ####################################################################
     # MAX ENTANGLEMENT for a system of dimension d, it is d (completely mixed state).
     max_ent = [-np.log(1/2**(min(n, num_qubits-n))) for n in range(1, num_qubits)]
-    
+
     ####################################################################
     # Plot
     if plot:
@@ -218,7 +288,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
         for idx, data in enumerate(ent_list):
             plt.errorbar(range(1, num_qubits), data[0], yerr=0*data[1], label=f"Rep {idx+1}", marker = 'o')
-        
+
         plt.plot(range(1, num_qubits), ent_list[0, 2], ls='-.', color='red', marker='v', label="Haar")
         plt.plot(range(1, num_qubits), max_ent, ls='--', marker='.', label="Maximum entanglement")
         plt.legend()
@@ -227,4 +297,3 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
         plt.show()
 
     return ent_list, max_ent
-    
