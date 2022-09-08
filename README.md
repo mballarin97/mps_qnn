@@ -51,7 +51,7 @@ However, in the folder `examples` we report the script and notebooks to perform 
 
    In this example, we show how to study the entanglement production inside a layered QNN with data reuploading with user-defined feature map and variational form. It is possible to use pre-defined circuit templates (see script `circuits.py` and `circuit_selector.py` below for a list of available pre-defined circuits), or even custom parametrized circuits created with Qiskit (in order to work, the circuits must have the attribute `.parameters`). The script can be used to generate data for studying the total entanglement production (function `ent_scaling`) or the entanglement distribution across bonds (`compute_bond_entanglement`).
 </details>
-
+ciao
 <details>
    <summary>`Entanglement.ipynb`</summary>
 
