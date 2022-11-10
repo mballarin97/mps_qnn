@@ -32,7 +32,7 @@ import numpy as np
 
 __all__ = ['general_qnn', 'circuit12', 'circuit15',
            'circuit9',  'circuit10', 'circuit1', 
-           'identity', 'circuit_adj']
+           'identity', 'circuit_adjm']
 
 def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True):
     """
