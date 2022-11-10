@@ -20,10 +20,13 @@ from qiskit import QuantumCircuit
 from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
 from qcircha.circuits import *
+from qcircha.circuits import circuit_adjm
+
+import numpy as np
 
 
-def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
-                 var_ansatz = 'TwoLocal', alternate=True):
+def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap', 
+                 var_ansatz = 'TwoLocal', alternate=True, va_mat_adj=np.zeros((1,1)), va_layer_ry=True, fm_mat_adj=np.zeros((1,1)), fm_layer_ry=True):
     """
     Select a circuit with a feature map and a variational block. Examples below.
     Each block must have reps = 1, and then specify the correct number of repetitions
@@ -38,6 +41,7 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
     - 'Circuit1' : circuit without entanglement with two single qubits rotations per qubit (n.1 from Kim et al.)
     - 'Identity' : identity circuit
     - 'Circuit9' : circuit n. 9 from Kim et al.
+    - 'Circuit_adjm' : circuit with entanglement map given by the adjacency matrix
     - variations of TwoLocal structures are present.
 
     Parameters
@@ -65,8 +69,8 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
         quantum circuit with the correct structure
     """
 
-    feature_map = _select_circ(num_qubits, feature_map)
-    var_ansatz = _select_circ(num_qubits, var_ansatz)
+    feature_map = _select_circ(num_qubits, feature_map, fm_mat_adj, fm_layer_ry)
+    var_ansatz = _select_circ(num_qubits, var_ansatz, va_mat_adj, va_layer_ry)
 
     # Build the PQC
     ansatz = general_qnn(num_reps, feature_map=feature_map,
@@ -75,7 +79,8 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
     return ansatz
 
 
-def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
+def _select_circ(num_qubits, circ = 'ZZFeatureMap', mat_adj=np.zeros((1,1)), layer_ry=True): 
+    #circ = 'ZZFeatureMap' definito di default,ma quando la chiamo gli assegno quella che voglio ovviamente
     """
     Select the circuit based on the possibilities
 
@@ -179,6 +184,9 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
 
         elif circ == 'identity':
             circ = identity(num_qubits)
+
+        elif circ == 'circuit_adjm':
+            circ == circuit_adjm(num_qubits, mat_adj, layer_ry, num_reps=1, barrier=False)
 
         else:
             raise ValueError(f'Circuit {circ} is not implemented.')

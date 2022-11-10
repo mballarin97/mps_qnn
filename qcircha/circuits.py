@@ -28,10 +28,11 @@ Refs:
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
+import numpy as np
 
 __all__ = ['general_qnn', 'circuit12', 'circuit15',
            'circuit9',  'circuit10', 'circuit1', 
-           'identity']
+           'identity', 'circuit_adj']
 
 def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True):
     """
@@ -293,6 +294,7 @@ def circuit10(num_qubits, num_reps=1, barrier=False):
 
 
 def circuit1(num_qubits, num_reps=1, barrier=False):
+
     """
     Create a dummy/easy qc without entanglement, corresponding to circuit 1 in [1].
     TODO: better describe the circuit
@@ -312,11 +314,12 @@ def circuit1(num_qubits, num_reps=1, barrier=False):
         The parametric quantum circuit
     """
 
+
     circ = QuantumCircuit(num_qubits, name = "circuit1")
 
-    num_params = 2 * num_qubits * num_reps
+    num_params = 2 * num_qubits * num_reps 
     params = ParameterVector('θ', length=num_params)
-    
+
     param_idx = 0
     for rep in range(num_reps):
         for ii in range(num_qubits):
@@ -396,3 +399,68 @@ def identity(num_qubits):
 
     circ = QuantumCircuit(num_qubits, name="identity", metadata={'entanglement_map': 'None'})
     return circ
+
+def circuit_adjm(num_qubits, mat_adj=np.zeros((1,1)), layer_ry=True, num_reps=1, barrier=False):
+
+    """
+        Circuit with parametric Ry rotation before and after 
+        (with the possibility of disabling one of the two layers) 
+        and a series of cnot compatible with an adjacency map
+
+        Parameters
+        ----------
+        num_qubits : int
+            Total number of qubits in the system
+        mat_adj : array
+            Adjacency matrix. Default to np.zeros(1,1)
+        layer_ry : bool
+            If True inserts a layer of Ry rotation at the end of the circuit. Default to True              
+        num_reps : int, optional
+            Number of repetitions. By default 1
+        barrier : bool, optional
+            If True, insert a barrier after each repetition. Default to False.
+      
+
+        Returns
+        -------
+        circ : :py:class:`QuantumCircuit`
+            The parametric quantum circuit
+        """
+
+    for r in range(len(mat_adj)):
+        for c in range(r):
+            if mat_adj[c,r]==mat_adj[r,c]: 
+                continue
+            else:
+                print("ERROR: mat_adj is not symmetric")
+                break
+
+
+    circ = QuantumCircuit(num_qubits, name = "circuit_adjm")
+
+    num_params = 2*num_qubits*num_reps 
+    params = ParameterVector('θ', length=num_params)
+
+    param_idx = 0
+    param_idx2= 4
+    for rep in range(num_reps):
+        for ii in range(num_qubits):
+            circ.ry(params[param_idx], ii)
+            param_idx += 1
+
+        for r in range(len(mat_adj)):
+            for c in range(r):
+                if mat_adj[r,c]==1: 
+                    circ.cx(c,r)
+
+        circ.barrier()
+
+        if layer_ry:
+            for ii in range(num_qubits):
+                circ.ry(params[param_idx2], ii)
+                param_idx2 += 1 
+
+        if barrier:
+            circ.barrier()
+
+    return circ           
