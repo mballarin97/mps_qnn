@@ -33,7 +33,7 @@ if __name__ == '__main__':
         os.mkdir(OUT_PATH)
 
     # SELECT PARAMETERS FOR THE GAUSSIAN
-    mean = np.pi/2.
+    mean = 0.
     sigma = 0.1 * np.pi
 
     distribution = lambda x : np.random.normal(mean, sigma, x)
