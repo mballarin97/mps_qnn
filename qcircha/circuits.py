@@ -426,7 +426,7 @@ def circuit_adjm(num_qubits, mat_adj=np.zeros((1,1)), layer_ry=True, num_reps=1,
         circ : :py:class:`QuantumCircuit`
             The parametric quantum circuit
         """
-
+    #Controllo matrice di adiacenza simmetrica
     for r in range(len(mat_adj)):
         for c in range(r):
             if mat_adj[c,r]==mat_adj[r,c]: 
