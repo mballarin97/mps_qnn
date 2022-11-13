@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     # SELECT PARAMETERS FOR THE GAUSSIAN
     mean = np.pi/2.
-    sigma = 10. * np.pi
+    sigma = 0.25 * np.pi
 
     distribution = lambda x : np.random.normal(mean, sigma, x)
     # Definisco una nuova funzione dove SOLO lambdax è la variabile
@@ -99,11 +99,13 @@ if __name__ == '__main__':
             # Saving the file
             #non ho ben capito come funziona e come posso leggere da file i dati .npy
             if alternate:
-                FILE_PATH = os.path.join(OUT_PATH, f'alternate_{circ_name}_{num_qub}.npy') 
+                FILE_PATH = os.path.join(OUT_PATH, f'{num_qub}_{circ_name}.npy') 
                 np.savetxt(FILE_PATH, ent_reorganized) 
+            '''
             else:
                 FILE_PATH = os.path.join(OUT_PATH, f'non_alternate_{circ_name}_{num_qub}.npy')
                 np.savetxt(FILE_PATH, ent_reorganized)
+            '''
 
             #avrò alla fine n-1 valori di entanglement se lavoro con n qbit
             #In questo caso ne ho 3 perchè lavoro con 4 qbit
@@ -132,5 +134,5 @@ if __name__ == '__main__':
     plt.title(f'Entanglement distribution across bonds_{circ_name}')
     fig1=plt.gcf()
     plt.show()
-    fig1.savefig(os.path.join(OUT_PATH, f'alternate_{circ_name}_{num_qub}.pdf'), format="pdf")
+    fig1.savefig(os.path.join(OUT_PATH, f'{num_qub}_{circ_name}.pdf'), format="pdf")
            
