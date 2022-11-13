@@ -28,6 +28,8 @@ import os # tools per input/outputs
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.rcParams['text.usetex'] = True
+import seaborn as sns
+cmap = sns.color_palette('deep', as_cmap=True)
 
 if __name__ == '__main__': 
     # Create output directory
@@ -38,7 +40,7 @@ if __name__ == '__main__':
 
     # SELECT PARAMETERS FOR THE GAUSSIAN
     mean = np.pi/2.
-    sigma = 0.1 * np.pi
+    sigma = 10. * np.pi
 
     distribution = lambda x : np.random.normal(mean, sigma, x)
     # Definisco una nuova funzione dove SOLO lambdax è la variabile
@@ -51,7 +53,9 @@ if __name__ == '__main__':
     circ_name = f'sigma_{sigma/np.pi}'
 
     # Number of qubits and alternate possibilities
-    num_qubits = np.arange(4, 6, 2) 
+    num_qubits = np.arange(8, 10, 2) 
+    print("NUM QBITS:")
+    print(num_qubits)
     #vettore che tiene in memoria il range di num_qubit selezionato, in questo caso è solo 4
     alternate_possibilities = (True,) 
     #genera blocchi di F e V alternati tra loro
@@ -80,8 +84,8 @@ if __name__ == '__main__':
             #print(ent_haar)
             #upperbound, massimo entanglement ottenibile
             ent_means = ent[:, 0, :] 
-            #print("PRINT MEANS:")
-            #print(ent_means)
+            print("PRINT MEANS:")
+            print(ent_means)
             #media entanglement calcolato per i diversi set di parametri ricavati dalla distribuzione
             ent_std = ent[:, 1, :] 
             #print("PRINT STD:")
@@ -93,7 +97,7 @@ if __name__ == '__main__':
             #print(ent_reorganized)
 
             # Saving the file
-            #non ho ben capito come funziona e come posso leggere da file i dati dopo
+            #non ho ben capito come funziona e come posso leggere da file i dati .npy
             if alternate:
                 FILE_PATH = os.path.join(OUT_PATH, f'alternate_{circ_name}_{num_qub}.npy') 
                 np.savetxt(FILE_PATH, ent_reorganized) 
@@ -104,14 +108,29 @@ if __name__ == '__main__':
             #avrò alla fine n-1 valori di entanglement se lavoro con n qbit
             #In questo caso ne ho 3 perchè lavoro con 4 qbit
 
-            #Plot
-            x = np.arange(1, num_qubits, 1)
-            fig = plt.figure(figsize=(9.6, 6))
-            plt.plot(x, ent_haar, '--ko', x, ent_means[0, :], '-bo', x, ent_means[1, :],'-go', x, ent_means[2, :], '-ro')
-            legend=plt.legend(['Maximally entangled','L=1', 'L=2', 'L=3'])
-            plt.xlabel("Bond index cut ")
-            plt.ylabel("Entanglement entropy (udm)")
-            plt.title(f'Entanglement distribution across bonds_{circ_name}')
-            plt.show()
+    #Plot
+    x = np.arange(1, num_qubits, 1)
+    #DEVO CAPIRE COME FARMI PLOTTARE SOLO GLI INTERI DULLE X
+    fig = plt.figure(figsize=(9.6, 6))
+    #4 QBITS:
+    #plt.plot(x, ent_haar, '--ko', x, ent_means[0, :], '-bo', x, ent_means[1, :],'-go', x, ent_means[2, :], '-ro')
+    #legend=plt.legend(['Haar random','L=1', 'L=2', 'L=3'])
 
-            #plt.savefig(f'alternate_{circ_name}_{num_qub}.pdf', format="pdf")
+    #8QBITS:
+
+    range = np.arange(0, len(ent_means), dtype=int)
+    for indx in range:
+        plt.plot(x, ent_means[indx, :], ls="-",
+        marker="o", c=cmap[indx], label=f'L=_{indx+1}')
+
+    plt.plot(x, ent_haar, ls="--",
+    marker="o", color=cmap[indx+1], label= 'Haar-random')  
+
+    plt.legend(loc=4)    
+    plt.xlabel("Bond index cut ")
+    plt.ylabel("Entanglement entropy")
+    plt.title(f'Entanglement distribution across bonds_{circ_name}')
+    fig1=plt.gcf()
+    plt.show()
+    fig1.savefig(os.path.join(OUT_PATH, f'alternate_{circ_name}_{num_qub}.pdf'), format="pdf")
+           
