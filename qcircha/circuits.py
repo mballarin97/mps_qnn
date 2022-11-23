@@ -400,7 +400,7 @@ def identity(num_qubits):
     circ = QuantumCircuit(num_qubits, name="identity", metadata={'entanglement_map': 'None'})
     return circ
 
-def circuit_adjm(num_qubits, mat_adj=np.zeros((1,1)), layer_ry=True, num_reps=1, barrier=False):
+def circuit_adjm(num_qubits, mat_adj=None, layer_ry=True, num_reps=1, barrier=False):
 
     """
         Circuit with parametric Ry rotation before and after 

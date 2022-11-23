@@ -100,7 +100,7 @@ if __name__ == '__main__':
             #non ho ben capito come funziona e come posso leggere da file i dati .npy
             if alternate:
                 FILE_PATH = os.path.join(OUT_PATH, f'{num_qub}_{circ_name}.npy') 
-                np.savetxt(FILE_PATH, ent_reorganized) 
+                np.savetxt(FILE_PATH, ent_reorganized) #per poter leggere i dati
             '''
             else:
                 FILE_PATH = os.path.join(OUT_PATH, f'non_alternate_{circ_name}_{num_qub}.npy')

@@ -26,7 +26,7 @@ import numpy as np
 
 
 def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap', 
-                 var_ansatz = 'TwoLocal', alternate=True, va_mat_adj=np.zeros((1,1)), va_layer_ry=True, fm_mat_adj=np.zeros((1,1)), fm_layer_ry=True):
+                 var_ansatz = 'TwoLocal', alternate=True, va_mat_adj= None, va_layer_ry=True, fm_mat_adj=None, fm_layer_ry=True):
     """
     Select a circuit with a feature map and a variational block. Examples below.
     Each block must have reps = 1, and then specify the correct number of repetitions
@@ -79,7 +79,7 @@ def pick_circuit(num_qubits, num_reps, feature_map = 'ZZFeatureMap',
     return ansatz
 
 
-def _select_circ(num_qubits, circ = 'ZZFeatureMap', mat_adj=np.zeros((1,1)), layer_ry=True): 
+def _select_circ(num_qubits, circ = 'ZZFeatureMap', mat_adj=None, layer_ry=True): 
     #circ = 'ZZFeatureMap' definito di default,ma quando la chiamo gli assegno quella che voglio ovviamente
     """
     Select the circuit based on the possibilities

@@ -17,7 +17,7 @@ The generated files have the following structure:
 - From line 2 to num_depths+1 the average entropy across the different
   random-sampled parameters
 - From num_depths+2 to 2*num_depths+3 the standard deviation of the
-  entropies for the different depths of the circuit
+  entnp.zeros((1,1))ropies for the different depths of the circuit
 """
 
 from qcircha import compute_bond_entanglement # computa l'entanglement delle diverse bipartizioni 
