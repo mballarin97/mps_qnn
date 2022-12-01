@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     # SELECT PARAMETERS FOR THE GAUSSIAN
     mean = np.pi/2.
-    sigma = 0.25 * np.pi
+    sigma = 0.7 * np.pi
 
     distribution = lambda x : np.random.normal(mean, sigma, x)
     # Definisco una nuova funzione dove SOLO lambdax è la variabile
@@ -80,8 +80,8 @@ if __name__ == '__main__':
 
             # Rearranging of the data for easy visualization
             ent_haar = ent[0, 2, :] #[blocco, riga, colonna] e ":" = prendi tutto
-            #print("PRINT HAAR:")
-            #print(ent_haar)
+            print("PRINT HAAR:")
+            print(ent_haar)
             #upperbound, massimo entanglement ottenibile
             ent_means = ent[:, 0, :] 
             print("PRINT MEANS:")
@@ -93,8 +93,8 @@ if __name__ == '__main__':
             #std della media dell'entamnglement sui vari set di parametri ricavati dalla distribuzione
 
             ent_reorganized = np.vstack( (ent_haar, ent_means, ent_std) ) 
-            #print("PRINT ENT_REO")
-            #print(ent_reorganized)
+            print("PRINT ENT_REO")
+            print(ent_reorganized)
 
             # Saving the file
             #non ho ben capito come funziona e come posso leggere da file i dati .npy
@@ -112,7 +112,6 @@ if __name__ == '__main__':
 
     #Plot
     x = np.arange(1, num_qubits, 1)
-    #DEVO CAPIRE COME FARMI PLOTTARE SOLO GLI INTERI DULLE X
     fig = plt.figure(figsize=(9.6, 6))
     #4 QBITS:
     #plt.plot(x, ent_haar, '--ko', x, ent_means[0, :], '-bo', x, ent_means[1, :],'-go', x, ent_means[2, :], '-ro')
