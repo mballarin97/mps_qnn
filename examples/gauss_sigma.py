@@ -40,7 +40,8 @@ if __name__ == '__main__':
 
     # SELECT PARAMETERS FOR THE GAUSSIAN
     mean = np.pi/2.
-    sigma = 0.7 * np.pi
+    sigma_pi = 0.45
+    sigma = sigma_pi * np.pi
 
     distribution = lambda x : np.random.normal(mean, sigma, x)
     # Definisco una nuova funzione dove SOLO lambdax è la variabile
@@ -50,7 +51,7 @@ if __name__ == '__main__':
 
     # Name of the circuit used in saving the files
     # Nome del circuito in base alla sigma scelta
-    circ_name = f'sigma_{sigma/np.pi}'
+    circ_name = f'sigma_{sigma_pi}'
 
     # Number of qubits and alternate possibilities
     num_qubits = np.arange(8, 10, 2) 
