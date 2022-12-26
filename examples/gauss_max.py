@@ -22,60 +22,97 @@ import os # tools per input/outputs
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-#sigma vector
+#tools for graphic title
+from math import log10, floor
+from decimal import Decimal
 
-sigma = np.array([0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3, 0.35,  0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7])
+#FUNZIONE PER SCRITTURA DECIMALE
+def format_e(n):
+    a = '%E' % n
+    return a.split('E')[0].rstrip('0').rstrip('.') + 'E' + a.split('E')[1]
+
+
+#SIGMA VECTOR
+sigma = np.logspace(-5, 3, 15)
 range_sigma = np.arange(0, len(sigma), dtype=int)
+sigma_pi_list = []
+for i in sigma:
+    mean = np.pi/2.
+    sigma_round = round(i, -int(floor(log10(abs(i)))) )
+    sigma_pi_list.append(format_e(Decimal(sigma_round)))
+sigma_pi = np.asarray(sigma_pi_list)
+print(sigma_pi)
 
-#Load data from np.load
-#ent_data=np.empty((15, 7, len(sigma)))
-ent_list = []
+ent_max_tot_list = []
 
-OUT_PATH = './ent_sigma/'
-for indx in range_sigma:
-    FILE_PATH = os.path.join(OUT_PATH, f'8_sigma_{sigma[indx]}.npy')     
-    load = np.loadtxt(FILE_PATH)
-    ent_list.append(load)
+# Nmber of qubits and alternate possibilities
+num_qubits = np.arange(8, 16, 2) 
+print("NUM QBITS:")
+print(num_qubits)
 
-ent_data = np.asarray(ent_list)
+for num_qub in num_qubits: 
 
-ent_haar = ent_data[0, 0, :]
-max_haar = ent_haar.max()
+    PATH = 'ent_sigma/' 
+    OUT_PATH = os.path.join(PATH, f'{num_qub}_qubit')
+    if not os.path.isdir(OUT_PATH):
+        os.mkdir(OUT_PATH)
 
-ent_max_list = []
-for ind in range_sigma:
-    max = (ent_data[ind, 7, :]).max()
-    print(max)
-    ent_max_list.append((max_haar - max))
+    #Load data from np.load
+    #ent_data=np.empty((15, 7, len(sigma)))
+    ent_list = []
+    for indx in range_sigma:
+        FILE_PATH = os.path.join(OUT_PATH, f'{num_qub}_sigma_{sigma_pi[indx]}.npy')     
+        load = np.loadtxt(FILE_PATH)
+        ent_list.append(load)
 
-ent_max = np.asarray(ent_max_list) 
-print("ent_max:")
-print(ent_max) #blocco:riga:colonna
+    ent_data = np.asarray(ent_list)
+    ent_haar = ent_data[0, 0, :]
+    max_haar = ent_haar.max()
 
-print("sigma:")
-print(len(sigma))
-print("max:")
-print(len(ent_max))
+    ent_max_list = []
+    for ind in range_sigma:
+        max = (ent_data[ind, 7, :]).max()
+        #print(max)
+        ent_max_list.append((max_haar - max))
 
-sum_up = np.vstack((sigma, ent_max)).T
+
+    ent_max = np.asarray(ent_max_list) 
+    ent_max_tot_list.append(ent_max)
+
+    print("ent_max:")
+    print(ent_max) #blocco:riga:colonna
+
+ent_max_tot = np.asarray(ent_max_tot_list) 
+print("ent_max_tot")
+print(ent_max_tot)
+
+sum_up = np.vstack((sigma, ent_max_tot))
 print("sum_up:")
 print(sum_up)
 
-FILE_PATH = os.path.join(OUT_PATH, f'max_difference.npy') 
-np.savetxt(FILE_PATH, sum_up)
+#FILE_PATH = os.path.join(OUT_PATH, f'max_difference.npy') 
+#np.savetxt(FILE_PATH, sum_up)
 
 #Plot
 fig = plt.figure(figsize=(9.6, 6))
+range = np.arange(0, len(num_qubits), dtype=int)
 
-plt.plot(sigma, ent_max, ls="--", marker="o", color=cmap[0], label = "Difference values")
+print("dimensioni")
+print(len(sum_up[1, :]))
+print(len(sigma))
 
+for indx in range:
+    print(indx)
+    plt.plot(sigma, sum_up[indx+1, :], ls="-", marker="o", c=cmap[indx], label=f'n={indx*2 + 8}')
+
+plt.xscale('log')
+plt.yscale('log')
 plt.legend(loc=1) 
-plt.xlabel("Sigma")
-plt.ylabel("Entanglement entropy")
-plt.title(f'Difference between the entanglement entropy maximum')
+plt.xlabel("Variance $\sigma$")
+plt.ylabel("Difference between the entanglement entropy maximum")
 fig1=plt.gcf()
 plt.show()
-fig1.savefig(os.path.join(OUT_PATH, f'max_difference.pdf'), format="pdf")
+fig1.savefig(os.path.join(PATH, f'max_difference_loglog.pdf'), format="pdf")
 
 
 
