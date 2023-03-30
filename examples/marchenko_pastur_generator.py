@@ -1,3 +1,18 @@
+# This code is part of qcircha.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+"""
+Here we generate the data for Fig 8 where we show the marchenko pastur distribution
+of the singular value
+"""
+
 import numpy as np
 from qcircha import pick_circuit
 from qmatchatea.py_emulator import QcMps
