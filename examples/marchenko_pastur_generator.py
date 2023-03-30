@@ -36,7 +36,7 @@ for num_layers in tqdm(layers):
             np.random.uniform(0, np.pi, num_params)
         )
 
-        mps = QcMps(num_qubits, 1, QCConvergenceParameters(int(2**(num_qubits//2)), cut_ratio=1e-20, singval_mode="C"))
+        mps = QcMps(num_qubits, QCConvergenceParameters(int(2**(num_qubits//2)), cut_ratio=1e-20, singval_mode="C"))
         mps.run_from_qk(qc)
         singvals = mps.singvals[num_qubits//2]
         singvals /= np.sqrt( np.sum(singvals**2) )
