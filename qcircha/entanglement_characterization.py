@@ -23,8 +23,8 @@ import time
 try:
     from qmatchatea import run_simulation
     from qmatchatea.qk_utils import qk_transpilation_params
-    from qmatchatea import QCConvergenceParameters
-    import tn_py_frontend.observables as obs
+    from qmatchatea import QCConvergenceParameters, QCBackend
+    import qtealeaves.observables as obs
     MPS_AVAILABLE = True
 except ImportError:
     MPS_AVAILABLE = False
@@ -63,11 +63,12 @@ def _run_mps(qc, max_bond_dim=1024, do_statevector=False):
     observables += obs.TNObsBondEntropy()
     if do_statevector:
         observables += obs.TNState2File('mps_state.txt', 'F')
-    conv_params = QCConvergenceParameters(max_bond_dim)
+    conv_params = QCConvergenceParameters(int(max_bond_dim) )
     trans_params = qk_transpilation_params(linearize=True)
+    backend = QCBackend()
 
     results = run_simulation(qc, convergence_parameters=conv_params,
-                             transpilation_parameters=trans_params, approach='PY',
+                             transpilation_parameters=trans_params, backend=backend,
                              observables=observables)
 
     return results

@@ -14,6 +14,7 @@ Welcome to qcircha's documentation!
    chapters/expressivity
    chapters/visualize
    chapters/utils
+   chapters/changelog
 
 
 Indices and tables

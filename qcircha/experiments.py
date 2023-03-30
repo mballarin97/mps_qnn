@@ -241,7 +241,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
     array-like of floats
         Maximum entanglement given by a completely mixed state
     """
-
+    from time import time
     ####################################################################
     # Entanglement in circuit and haar
     if depths is None:
@@ -252,6 +252,7 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
 
     ent_list = []
+    times = []
     for num_reps in depths:
         print(f"\n__Reps {num_reps}/{np.max(depths)}")
 
@@ -264,11 +265,12 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
             data = ansatz.metadata
             data['max_bond_dim'] = max_bond_dim
             ansatz.metadata = data
-
+        start = time()
         # Run simulation and save result
         tmp = entanglement_characterization(ansatz=ansatz, backend=backend,
             distribution=distribution, trials=num_trials)
         ent_list.append(tmp[:-1])
+        times.append( (time()-start)/num_trials )
 
     ent_list = np.array(ent_list)
 
@@ -296,4 +298,4 @@ def compute_bond_entanglement(num_qubits, feature_map='ZZFeatureMap', var_ansatz
 
         plt.show()
 
-    return ent_list, max_ent
+    return ent_list, max_ent, times

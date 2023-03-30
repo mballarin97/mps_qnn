@@ -103,10 +103,9 @@ The following packages are required to run the code:
 - scipy
 - matplolib
 - qiskit
-- tn_py_frontend *(only needed for MPS simulation)*
-- qmatchatea *(only needed for MPS simulation)*
+- qtealeaves *(only needed for MPS simulation)* [available here](https://baltig.infn.it/quantum_tea_leaves/py_api_quantum_tea_leaves)
+- qmatchatea *(only needed for MPS simulation)* [available here](https://baltig.infn.it/quantum_matcha_tea/py_api_quantum_matcha_tea)
 
-The latter two packages are available from Marco Ballarin upon reasonable request.
 
 ## License
 

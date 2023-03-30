@@ -16,13 +16,15 @@ set of qubits
 from qcircha import compute_bond_entanglement
 import numpy as np
 
-num_qubits = np.arange(4, 6, 2)
+num_qubits = [16]
 alternate_possibilities = (True,)
+backend = "MPS"
 
 for num_qub in num_qubits:
     for alternate in alternate_possibilities:
-        ent, _ = compute_bond_entanglement(num_qub, feature_map='twolocal',
-        var_ansatz='twolocal', alternate=alternate, backend='MPS')
+        ent, _, times = compute_bond_entanglement(num_qub, feature_map='ZZFeatureMap',
+        var_ansatz='twolocal', alternate=alternate, backend=backend, num_trials=100,
+        max_bond_dim=2**8)
 
         ent_haar = ent[0, 2, :]
         ent_means = ent[:, 0, :]
@@ -31,6 +33,7 @@ for num_qub in num_qubits:
         ent_reorganized = np.vstack( (ent_haar, ent_means, ent_std) )
 
         if alternate:
-            np.savetxt(f'ent_scaling/alternate_c2{num_qub}.npy', ent_reorganized)
+            np.savetxt(f'data/marcos_plot/alternate_abbas{num_qub}.npy', ent_reorganized)
+            np.savetxt(f'data/marcos_plot/alternate_abbas{num_qub}_{backend}_time.npy', times)
         else:
-            np.savetxt(f'ent_scaling/non_alternate_c2{num_qub}.npy', ent_reorganized)
+            np.savetxt(f'data/marco_ent_scaling/non_alternate_abbas{num_qub}.npy', ent_reorganized)
