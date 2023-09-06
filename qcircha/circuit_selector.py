@@ -180,6 +180,9 @@ def _select_circ(num_qubits, circ = 'ZZFeatureMap'):
         elif circ == 'identity':
             circ = identity(num_qubits)
 
+        elif circ == 'mps':
+            circ = mps_circ(num_qubits)
+
         else:
             raise ValueError(f'Circuit {circ} is not implemented.')
 

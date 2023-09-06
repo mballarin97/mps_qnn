@@ -15,7 +15,7 @@ Each function returns a Variational Circuit and also a string of its name, for l
 When adding new circuits, do it in the same format of the other, by:
 1. Providing an understandable name to the circuit;
 2. Add entanglement map in the metadata information;
-3. If other data is needed, then update the general_qnn function to include that data; 
+3. If other data is needed, then update the general_qnn function to include that data;
 
 Circuit numbers from Fig. 2 of [1].
 Abbass QNN from [2].
@@ -28,10 +28,43 @@ Refs:
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
+import numpy as np
 
 __all__ = ['general_qnn', 'circuit12', 'circuit15',
-           'circuit9',  'circuit10', 'circuit1', 
-           'identity']
+           'circuit9',  'circuit10', 'circuit1',
+           'identity', 'mps_circ']
+
+class SU4Gate(QuantumCircuit):
+    def __init__(self, name: str = "SU4Gate", param_prefix: str = "x"):
+        qc = QuantumCircuit(2, name=name)
+        parameters = ParameterVector(name=param_prefix, length=15)
+
+        # Add single-qubit gates
+        qc.rz(parameters[0], 0)
+        qc.ry(parameters[2], 0)
+        qc.rz(parameters[4], 0)
+
+        qc.rz(parameters[1], 1)
+        qc.ry(parameters[3], 1)
+        qc.rz(parameters[5], 1)
+
+        # Add two-qubit gates
+        qc.rxx(parameters[6], 0, 1)
+        qc.ryy(parameters[7], 0, 1)
+        qc.rzz(parameters[8], 0, 1)
+
+        # Add single-qubit gates
+        qc.rz(parameters[9], 0)
+        qc.ry(parameters[11], 0)
+        qc.rz(parameters[13], 0)
+
+        qc.rz(parameters[10], 1)
+        qc.ry(parameters[12], 1)
+        qc.rz(parameters[14], 1)
+
+        super().__init__(2, name=name)
+        self.append(qc.to_gate(), self.qubits)
+
 
 def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True):
     """
@@ -102,13 +135,13 @@ def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True
         raise TypeError(f"Structure {alternate} not implemented. ")
 
     # Extract feature map entanglement map
-    try: 
+    try:
         feature_map.entanglement
     except:
         fmap_entanglement = feature_map.metadata["entanglement_map"]
-    else:  
+    else:
         fmap_entanglement = feature_map.entanglement
-    
+
     # Extract variational ansatz entanglement map
     try:
         var_ansatz.entanglement
@@ -135,13 +168,13 @@ def general_qnn(num_reps, feature_map, var_ansatz, alternate=False, barrier=True
 def circuit12(num_qubits, num_reps=1, piramidal=True, barrier=False):
     """
     Create the piramidal circuit generalization corresponding to the circuit 12 of the paper [1].
-    
+
     Parameters
     ----------
     num_qubits : int
         Total number of qubits in the system
     num_reps : int, optional
-        Number of repetitions. It is particolarly important when 
+        Number of repetitions. It is particolarly important when
         piramidal=False. By default 1
     piramidal : bool, optional
         If you should use the piramidal architecture. If False, only
@@ -198,7 +231,7 @@ def circuit12(num_qubits, num_reps=1, piramidal=True, barrier=False):
 def circuit15(num_qubits, num_reps=1, barrier=False):
     """
     Create the circuit NN with periodic conditions at the boundaries, corresponding to the circuit 15 of the paper [1].
-    
+
     Parameters
     ----------
     num_qubits : int
@@ -230,7 +263,7 @@ def circuit15(num_qubits, num_reps=1, barrier=False):
         for ii in range(num_qubits):
             circ.ry(params[param_idx], ii)
             param_idx += 1
-        
+
         circ.cx(num_qubits-1, num_qubits-2)
         circ.cx(0, num_qubits-1)
         for ii in range(0, num_qubits-2):
@@ -316,7 +349,7 @@ def circuit1(num_qubits, num_reps=1, barrier=False):
 
     num_params = 2 * num_qubits * num_reps
     params = ParameterVector('θ', length=num_params)
-    
+
     param_idx = 0
     for rep in range(num_reps):
         for ii in range(num_qubits):
@@ -324,7 +357,7 @@ def circuit1(num_qubits, num_reps=1, barrier=False):
             param_idx += 1
             circ.rz(params[param_idx], ii)
             param_idx += 1
-        
+
         if barrier:
             circ.barrier()
 
@@ -363,10 +396,10 @@ def circuit9(num_qubits, num_reps=1, barrier=False):
     for rep in range(num_reps):
         for ii in range(num_qubits):
             circ.h(ii)
-        
+
         for ii in range(num_qubits-1):
             circ.cz(ii, ii+1)
-        
+
         for ii in range(num_qubits):
             circ.rx(params[param_idx], ii)
             param_idx += 1
@@ -381,7 +414,7 @@ def circuit9(num_qubits, num_reps=1, barrier=False):
 
 def identity(num_qubits):
     """
-    Identity circuit, does nothing. 
+    Identity circuit, does nothing.
 
     Parameters
     ----------
@@ -396,3 +429,42 @@ def identity(num_qubits):
 
     circ = QuantumCircuit(num_qubits, name="identity", metadata={'entanglement_map': 'None'})
     return circ
+
+def mps_circ(num_qubits):
+    bond_dimensions = [2**ii for ii in range(1, int(np.ceil(num_qubits/2)+1))]
+    if num_qubits%2 == 0:
+        bond_dimensions += bond_dimensions[:-1][::-1]
+    else:
+        bond_dimensions += bond_dimensions[::-1]
+    qc = QuantumCircuit(len(bond_dimensions)+1)
+    skip = None
+    ii = 0
+    for idx, bd in enumerate(bond_dimensions):
+        num_qubs = int(np.ceil(np.log2(bd)))
+
+        for nq1 in range(1, num_qubs+1):
+            if skip is not None:
+                if skip[nq1-1]:
+                    continue
+
+            gate_idx = nq1-1
+            for nq in range(nq1, 0, -1):
+                qc.append(SU4Gate( param_prefix=f"θ{ii}"), (idx+nq, idx+nq-1) )
+                if nq - 1 == np.ceil(nq1/2) and nq1%2 == 0:
+                    gate_idx = gate_idx
+                elif nq-1 > nq1/2:
+                    gate_idx -= 2
+                else:
+                    gate_idx += 2
+                ii += 1
+
+        if idx < len(bond_dimensions)-1:
+            if bd > bond_dimensions[idx+1] or bd >4:
+                skip = [True if nq>1 else False for nq in range(num_qubs)][::-1]
+                skip.append(False)
+            else:
+                skip = None
+    metadata = dict({"entanglement_map": "linear"})
+    qc.metadata = metadata
+
+    return qc
